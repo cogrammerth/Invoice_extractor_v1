@@ -1,0 +1,66 @@
+================================================================
+NEXT STEPS — invoice_extractor_v1
+================================================================
+
+STEP 1 — REPLACE PLACEHOLDER FILES
+   Two starter files were missing from the project folder at setup
+   time and have been replaced by placeholders:
+
+     backend/src/services/thai-extraction-prompt.ts
+     backend/src/db/thai-invoice-schema.ts
+
+   Drop the real content from your starter pack into these paths,
+   overwriting the placeholders.
+
+STEP 2 — INITIALIZE GIT
+   cd "C:\Synnex Project\Invoice_extractor_v1"
+   git init
+   git add .
+   git commit -m "chore: initial scaffold via Cowork"
+
+STEP 3 — CONFIGURE BACKEND ENV
+   copy backend\.env.example backend\.env
+   Then edit backend\.env:
+     - DATABASE_URL          (PostgreSQL connection string)
+     - GEMINI_API_KEY        (Google Gemini Vision API key)
+
+STEP 4 — CONFIGURE FRONTEND ENV
+   copy frontend\.env.example frontend\.env
+   Then verify VITE_API_URL points at the backend (default
+   http://localhost:3000).
+
+STEP 5 — INSTALL DEPENDENCIES
+   The package.json files are not yet generated. Once you create
+   them (or run a generator like `npm init` / `vite create`),
+   then run:
+
+     cd backend  && npm install
+     cd frontend && npm install
+
+   Or use the helper:
+     bash scripts/setup.sh        (on Git Bash / WSL)
+
+STEP 6 — START DEVELOPMENT
+   bash scripts/start-dev.sh
+   OR
+     (cd backend  && npm run dev)
+     (cd frontend && npm run dev)
+
+STEP 7 — OPTIONAL: DOCKER
+   cd docker
+   docker compose up --build
+
+STEP 8 — OPEN IN CURSOR IDE
+   - Open the project folder in Cursor
+   - In Cursor Chat, verify rules are picked up:
+       @00-core.md
+       @AGENTS.md
+   - Cursor should load the .cursorrules automatically.
+
+================================================================
+TIPS
+  - The 27 .gitkeep files keep empty folders under version
+    control. Delete them once real files land in those folders.
+  - Stubs in docs/ (API.md, ARCHITECTURE.md) are intentionally
+    short — flesh them out as the project takes shape.
+================================================================

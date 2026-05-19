@@ -1,0 +1,565 @@
+# Thai Invoice Extraction System - Cursor/Claude Rules
+# Version: 1.0
+# Last Updated: May 2026
+# Format: Markdown (.cursorrules - new 2025 format)
+
+## 🎯 PROJECT OVERVIEW
+
+**Project Name:** Thai Invoice Extraction System
+**Description:** Production-grade AI-powered Thai invoice/document data extraction using Gemini Vision API with real-time validation, multi-page support, and comprehensive error handling
+
+**Target Environment:** Production (enterprise-grade)
+**Development Status:** Initial Build Phase
+
+---
+
+## 📋 SYSTEM ARCHITECTURE
+
+### High-Level Architecture
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     FRONTEND (React 19 + TypeScript)             │
+│  - InvoiceUpload component with drag-drop                        │
+│  - Real-time error popups via WebSocket                          │
+│  - Token usage dashboard                                          │
+│  - Mobile responsive (Tailwind CSS v4)                           │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │ HTTPS/WSS
+                           ▼
+┌──────────────────────────────────────────────────────────────────┐
+│              BACKEND (Node.js 24 LTS + Express 4.21+)             │
+│  - Express server with strict validation                         │
+│  - 4 REST API endpoints                                           │
+│  - WebSocket for real-time notifications                         │
+│  - JWT authentication                                             │
+│  - File upload processing                                         │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │ TCP/SSL
+                           ▼
+┌──────────────────────────────────────────────────────────────────┐
+│         SERVICE LAYER (GeminiExtractionService)                   │
+│  - Gemini Vision API integration                                  │
+│  - Thai text preservation (exact character-by-character)         │
+│  - 14-field data extraction                                       │
+│  - Validation engine                                              │
+│  - Error classification (9 types)                                 │
+│  - Token counting & cost calculation                              │
+│  - Auto-retry with exponential backoff                            │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │ HTTPS
+                           ▼
+┌──────────────────────────────────────────────────────────────────┐
+│        EXTERNAL: Google Gemini Vision API (gemini-2.0-flash)     │
+│  - Image-to-text extraction                                       │
+│  - JSON response parsing                                          │
+│  - Token usage tracking                                           │
+└──────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│         DATABASE (PostgreSQL 17 with PostGIS extensions)         │
+│  ├─ thai_invoices (16 fields + metadata)                         │
+│  ├─ api_error_logs (9+ error types)                              │
+│  ├─ api_token_usage (billing & analytics)                        │
+│  ├─ api_retry_queue (auto-retry management)                      │
+│  ├─ api_pricing_config (cost tracking)                           │
+│  ├─ api_health_metrics (daily analytics)                         │
+│  ├─ audit_logs (compliance & tracking)                           │
+│  ├─ invoice_files (file management)                              │
+│  └─ validation_rules (config-driven validation)                  │
+└──────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│              FILE STORAGE (Local with S3 ready)                   │
+│  ├─ uploads/temp/ (processing queue)                             │
+│  ├─ uploads/success/ (processed invoices)                        │
+│  ├─ uploads/failed/ (failed extractions)                         │
+│  └─ uploads/json/ (cron pickup for downstream)                   │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 💻 TECHNOLOGY STACK (Latest Compatible Versions as of May 2026)
+
+### Runtime & Package Management
+- **Node.js:** 24.15.0 LTS (Krypton) - Active LTS until 2028-05-31
+- **npm:** 11.12.1+ (bundled with Node.js)
+- **Package Manager:** npm (no yarn/pnpm to reduce complexity)
+
+### Backend (Production)
+- **Framework:** Express 4.21.2+
+- **Language:** TypeScript 5.7.2+
+- **Database Driver:** pg 8.13.1+ (PostgreSQL native)
+- **ORM/Query Builder:** None (use parameterized queries directly for security & performance)
+- **Database:** PostgreSQL 17.2+ (latest production release)
+- **Validation:** Zod 3.24.2+ (TypeScript-first schema validation)
+- **File Handling:** multer 1.4.5-lts.1+
+- **WebSocket:** ws 8.19.0+ (native WebSocket library)
+- **Env Vars:** dotenv 16.4.7+
+- **UUID Generation:** uuid 10.0.0+
+- **Cron Jobs:** node-cron 3.0.3+
+- **Logging:** winston 3.15.0+ or pino 9.6.0+ (structured JSON logging)
+- **Security:** 
+  - jsonwebtoken 9.1.2+
+  - helmet 7.2.0+ (HTTP security headers)
+  - cors 2.8.5+
+  - express-rate-limit 7.8.1+
+
+### Frontend (React 19)
+- **React:** 19.2.6+ (latest, with React Compiler support)
+- **React DOM:** 19.2.6+
+- **Language:** TypeScript 5.7.2+
+- **Styling:** Tailwind CSS 4.2.4+
+- **Component Library:** Headless UI 2.2.1+ (unstyled, accessible components)
+- **Form Handling:** React Hook Form 7.54.0+ (lightweight, performant)
+- **HTTP Client:** axios 1.7.9+ (with automatic request/response interceptors)
+- **State Management:** None (use React Context + hooks for simplicity)
+- **WebSocket Client:** Socket.io-client 4.8.1+ (with auto-reconnect)
+- **Icons:** Lucide React 0.451.0+
+- **Notifications:** Sonner 2.1.2+ (toast notifications)
+- **Build Tool:** Vite 6.1.0+ (faster than CRA, better DX)
+
+### AI & ML
+- **Gemini API:** @google/generative-ai 0.21.1+
+- **Vision Model:** gemini-2.0-flash-exp (latest available)
+
+### Development & Testing
+- **Linting:** ESLint 9.15.0+
+- **Code Formatter:** Prettier 3.4.2+
+- **Testing Framework:** Vitest 3.0.1+ (Vite-native, 5-10x faster than Jest)
+- **API Testing:** Postman 14.0+
+- **Load Testing:** Apache JMeter or k6 2.1.0+
+- **Security Scanning:** 
+  - npm audit
+  - Snyk 1.1412.0+
+  - OWASP dependency-check
+
+### Database Tools
+- **Admin Client:** pgAdmin 4 (web-based)
+- **Query Editor:** DBeaver 24.3.0+
+- **Migration Tool:** Flyway 10.17.0+ or custom Node scripts
+- **Monitoring:** pgAdmin alerts + custom queries
+
+### DevOps & Deployment
+- **Containerization:** Docker 27.0+, Docker Compose 2.30+
+- **Cloud Platform:** AWS/GCP/Azure (Kubernetes-ready architecture)
+- **CI/CD:** GitHub Actions (native, no 3rd party needed)
+- **Monitoring:** Prometheus + Grafana (optional, add later)
+- **Logging:** ELK Stack (Elasticsearch + Logstash + Kibana) or Datadog
+
+---
+
+## 🏗️ PROJECT STRUCTURE
+
+```
+thai-invoice-extraction/
+├── .cursor/
+│   ├── rules/
+│   │   ├── 00-core.md (core development standards)
+│   │   ├── 01-architecture.md (system architecture guidelines)
+│   │   ├── 02-security.md (security & auth rules)
+│   │   ├── 03-performance.md (optimization guidelines)
+│   │   ├── 04-testing.md (testing & QA standards)
+│   │   └── 05-deployment.md (deployment procedures)
+│   └── AGENTS.md (agent instructions for Cursor)
+├── backend/
+│   ├── src/
+│   │   ├── config/
+│   │   │   ├── database.ts (PostgreSQL connection pool)
+│   │   │   ├── env.ts (validated environment variables)
+│   │   │   └── constants.ts (app-wide constants)
+│   │   ├── types/
+│   │   │   ├── invoice.types.ts (Thai invoice data types)
+│   │   │   ├── api.types.ts (API request/response types)
+│   │   │   └── error.types.ts (error classifications)
+│   │   ├── services/
+│   │   │   ├── GeminiExtractionService.ts (AI extraction + validation)
+│   │   │   ├── TokenTrackingService.ts (billing & analytics)
+│   │   │   └── RetryQueueService.ts (auto-retry logic)
+│   │   ├── routes/
+│   │   │   ├── thai-invoices.ts (main invoice endpoints)
+│   │   │   └── health.ts (health check endpoint)
+│   │   ├── middleware/
+│   │   │   ├── auth.middleware.ts (JWT + RBAC)
+│   │   │   ├── validation.middleware.ts (request validation)
+│   │   │   ├── error-handler.middleware.ts (global error handler)
+│   │   │   └── logging.middleware.ts (request/response logging)
+│   │   ├── db/
+│   │   │   ├── schema.sql (database migrations)
+│   │   │   ├── queries.ts (prepared statements)
+│   │   │   └── seeds.sql (test data)
+│   │   ├── websocket/
+│   │   │   └── notification-handler.ts (real-time events)
+│   │   ├── utils/
+│   │   │   ├── logger.ts (structured JSON logging)
+│   │   │   ├── errors.ts (custom error classes)
+│   │   │   └── validators.ts (reusable validation functions)
+│   │   └── server.ts (Express app initialization)
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── .env.example
+│   ├── .env.production
+│   └── README.md
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── InvoiceUpload.tsx (main upload component)
+│   │   │   ├── ErrorNotification.tsx (toast alerts)
+│   │   │   ├── TokenDashboard.tsx (cost tracking)
+│   │   │   └── ValidationErrorSummary.tsx (field-level errors)
+│   │   ├── hooks/
+│   │   │   ├── useInvoiceUpload.ts (upload logic)
+│   │   │   ├── useWebSocket.ts (real-time events)
+│   │   │   └── useTokenTracking.ts (cost display)
+│   │   ├── services/
+│   │   │   └── api.ts (HTTP client with interceptors)
+│   │   ├── types/
+│   │   │   ├── invoice.types.ts (Thai invoice types)
+│   │   │   └── api.types.ts (API response types)
+│   │   ├── styles/
+│   │   │   └── globals.css (Tailwind config)
+│   │   ├── App.tsx
+│   │   └── main.tsx
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── vite.config.ts
+│   ├── tailwind.config.ts
+│   └── README.md
+├── docker/
+│   ├── Dockerfile (production image)
+│   ├── Dockerfile.dev (development image)
+│   └── docker-compose.yml (local dev environment)
+├── tests/
+│   ├── unit/ (Vitest)
+│   ├── integration/ (Vitest + test database)
+│   └── e2e/ (Playwright)
+├── docs/
+│   ├── API.md (OpenAPI/Swagger spec)
+│   ├── ARCHITECTURE.md (system design)
+│   ├── DEPLOYMENT.md (prod deployment guide)
+│   └── TROUBLESHOOTING.md (common issues & fixes)
+├── .github/
+│   └── workflows/
+│       ├── ci.yml (lint, test, build)
+│       ├── security-scan.yml (dependency scanning)
+│       └── deploy-staging.yml (automated staging deploy)
+├── .gitignore
+├── .env.example
+└── README.md
+```
+
+---
+
+## 🔑 CORE DEVELOPMENT PRINCIPLES
+
+### 1. Thai Text Preservation (Critical)
+- **NEVER** translate Thai text
+- **NEVER** correct spelling or grammar
+- **NEVER** normalize characters
+- Return exact character-by-character matches from Gemini response
+- If text is partially blocked/unclear, return only readable portion
+- Document all Thai text extraction with UTF-8 encoding guarantee
+
+### 2. Type Safety (Mandatory)
+- **100% TypeScript** (no JavaScript files except config)
+- Strict mode enabled: `"strict": true` in tsconfig.json
+- Use Zod for runtime validation of all external data
+- Generate types from database schema (use type-safe QueryBuilder)
+- No `any` types - use explicit typing or generics
+
+### 3. Security First
+- Principle: Fail securely, never expose internals
+- **Database Security:**
+  - Always use parameterized queries (never string interpolation)
+  - Implement row-level security (RLS) in PostgreSQL
+  - Encrypt sensitive fields at rest (PII, API keys)
+- **Authentication:**
+  - JWT with RS256 algorithm (asymmetric, more secure than HS256)
+  - Tokens expire in 15 minutes (access), 7 days (refresh)
+  - Never store raw passwords (use bcrypt with salt rounds = 12)
+- **API Security:**
+  - Helmet for HTTP security headers
+  - Rate limiting: 100 requests/15 minutes per user
+  - CORS locked to frontend domain only
+  - Input validation on every endpoint (Zod)
+  - HTTPS only (TLS 1.3)
+- **File Security:**
+  - Validate file MIME type + magic bytes (not just extension)
+  - Scan uploaded files with ClamAV (optional but recommended)
+  - Store files outside web root
+  - Implement file access controls
+- **Secrets Management:**
+  - Use `.env` files ONLY in development
+  - Production: use AWS Secrets Manager / Azure Key Vault / Google Secret Manager
+  - Never commit `.env` files
+  - Rotate API keys every 90 days
+
+### 4. Performance & Optimization
+- **Frontend:**
+  - React 19 Compiler enabled (auto-optimization)
+  - Code splitting by route (Vite lazy loading)
+  - Image optimization (Webp with fallbacks)
+  - Bundle target: < 100KB gzipped main bundle
+  - Core Web Vitals: LCP < 2.5s, FID < 100ms, CLS < 0.1
+- **Backend:**
+  - Connection pooling: min 5, max 20 connections (PostgreSQL)
+  - Query optimization: indexed queries only
+  - Caching strategy: Redis for frequently accessed data (optional, Phase 2)
+  - Response compression: gzip for > 1KB responses
+  - API response time target: < 500ms p95
+- **Database:**
+  - 20+ indexes on frequently queried columns
+  - Partitioning by date for large tables (after 1M rows)
+  - VACUUM & ANALYZE schedule (weekly)
+  - Connection timeout: 30 seconds
+  - Query timeout: 30 seconds (prevent runaway queries)
+
+### 5. Error Handling Strategy
+- **All errors must be:**
+  - Typed using custom error classes
+  - Logged with context (user, action, timestamp)
+  - Returned with proper HTTP status codes
+  - Sanitized before sending to client (never expose stack traces)
+- **Error Classification (9 types):**
+  1. RATE_LIMIT (429) → Auto-retry after 60s
+  2. QUOTA_EXCEEDED (403) → Queue for later
+  3. INVALID_API_KEY (401) → Alert admin, no retry
+  4. TIMEOUT → Retry up to 3x
+  5. SERVER_ERROR (5xx) → Retry with backoff
+  6. NETWORK_ERROR → Auto-retry
+  7. MALFORMED_RESPONSE → Log & alert
+  8. INVALID_IMAGE → User action required
+  9. VALIDATION_ERROR → Return field-level errors
+- **Never swallow errors:** Always log and alert
+
+### 6. Testing Standards (Code Coverage: Min 80%)
+- **Unit Tests** (Vitest):
+  - All services: 100% coverage
+  - All utilities: 100% coverage
+  - Components: 80% coverage
+  - Target: < 200ms per test
+- **Integration Tests:**
+  - Database operations
+  - API endpoints with real DB
+  - WebSocket events
+  - File upload/processing
+- **E2E Tests** (optional, Phase 2):
+  - Critical user flows
+  - Upload → Extraction → Validation → Result
+- **Test Database:**
+  - Isolated PostgreSQL instance
+  - Auto-cleanup between tests
+  - Use transactions for isolation
+
+### 7. Documentation Requirements
+- Every public function: JSDoc comments with @example
+- Database schema: documented with constraints & relationships
+- API endpoints: OpenAPI/Swagger spec (auto-generated)
+- Architecture decisions: ADR (Architecture Decision Records) format
+- README: setup, running, testing, deployment
+
+### 8. Code Quality Standards
+- **Linting:** ESLint with strict rules (no warnings)
+- **Formatting:** Prettier (enforced in CI/CD)
+- **Naming Conventions:**
+  - Files: kebab-case (invoice-upload.tsx)
+  - Classes: PascalCase (GeminiExtractionService)
+  - Functions/Variables: camelCase (extractInvoiceData)
+  - Constants: UPPER_SNAKE_CASE (MAX_FILE_SIZE)
+  - Booleans: is/has prefix (isProcessing, hasError)
+- **Max complexity per function:** 10 (enforced by ESLint)
+- **Max lines per file:** 500 (refactor if exceeded)
+- **Cyclomatic complexity:** < 5 per function
+
+---
+
+## 📝 VALIDATION RULES (NON-NEGOTIABLE)
+
+### Required Fields (Database Constraints)
+```sql
+-- invoice_number: NOT NULL, 1-255 chars
+-- cust_code: NOT NULL, 1-255 chars
+-- All validation errors must be caught before database insert
+```
+
+### Field-Level Validation
+- **invoice_number:** Required, unique, alphanumeric + special chars allowed
+- **cust_code:** Required, alphanumeric, max 255 chars
+- **net_total:** Optional, must be positive if present
+- **Thai text fields:** No validation beyond encoding check (preserve exactly)
+- **Dates:** ISO 8601 format (YYYY-MM-DD)
+
+### API Request Validation
+- Validate all incoming JSON with Zod schema
+- Return 400 with field-level error details
+- Validation error response format:
+  ```json
+  {
+    "success": false,
+    "errors": [
+      { "field": "invoice_number", "message": "Required field" },
+      { "field": "cust_code", "message": "Customer code is required" }
+    ]
+  }
+  ```
+
+---
+
+## 🚀 DEPLOYMENT & OPERATIONS
+
+### Environment Management
+- **Development:** .env (local, not committed)
+- **Staging:** Environment variables in deployment platform
+- **Production:** Secrets manager (AWS/GCP/Azure), no .env files
+
+### Database Migrations
+- Use Flyway or custom Node.js scripts
+- Version all migrations (001_initial_schema.sql)
+- Test migrations on staging before production
+- Maintain rollback scripts for every migration
+
+### Monitoring & Observability
+- **Logs:** Structured JSON (winston/pino)
+- **Metrics:** Prometheus-compatible endpoints
+- **Alerts:** 
+  - Error rate > 5% in last 5 minutes
+  - API response time p95 > 1 second
+  - Database connection pool exhausted
+  - Failed validations > 100/hour
+
+### Backup & Disaster Recovery
+- PostgreSQL: daily backups, 30-day retention
+- Uploads: backup to S3/GCS weekly
+- RTO (Recovery Time Objective): 1 hour
+- RPO (Recovery Point Objective): 1 day
+- Test restore procedures monthly
+
+---
+
+## 🧪 AI GENERATION GUIDELINES FOR CURSOR/CLAUDE
+
+When working with Cursor or Claude:
+
+### Do This
+1. **Ask for specific implementations:** "Implement the ThaiInvoiceExtractionService with the exact validation rules for invoice_number and cust_code"
+2. **Reference files explicitly:** "@thai-invoice-schema.ts" to add context
+3. **Request architecture diagrams:** Use Mermaid for system flows
+4. **Ask for tests first:** "Write unit tests for TokenTrackingService before implementing"
+5. **Request performance estimates:** "Estimate the token count for a typical Thai invoice"
+6. **Ask for TypeScript types:** "Generate strict types for all API responses based on schema"
+
+### Don't Do This
+1. ❌ Ask for JavaScript (always request TypeScript)
+2. ❌ Ask for magic numbers (request named constants)
+3. ❌ Ask to skip validation (all inputs must be validated)
+4. ❌ Ask for quick & dirty solutions (always production-quality)
+5. ❌ Ask to store secrets in code (use environment variables)
+6. ❌ Ask to SQL inject (always use parameterized queries)
+
+### Cursor-Specific Prompts
+```
+# Good prompt structure for Cursor:
+"Using the system architecture from @AGENTS.md and following @02-security.md:
+1. Implement JWT middleware with RS256
+2. Add token refresh logic
+3. Write unit tests (Vitest)
+4. Include error handling for expired tokens
+5. Ensure < 50ms overhead per request"
+
+# This tells Cursor:
+- Files to reference (@filename)
+- Rules to follow (@rulefile.md)
+- Expected quality level
+- Performance targets
+```
+
+---
+
+## 📊 METRICS & KPIs
+
+### Development Metrics
+- Code coverage: ≥ 80%
+- Test pass rate: 100%
+- Linting errors: 0
+- Type errors: 0
+- Failed deployments: < 1%
+
+### Performance Metrics
+- API response time p95: < 500ms
+- Token cost per invoice: < $0.0003
+- Extraction success rate: > 99%
+- Validation error rate: < 2%
+
+### Business Metrics
+- Processing throughput: > 100 invoices/minute
+- Token cost per month: forecast accurately
+- System uptime: > 99.9%
+- User satisfaction: track via surveys
+
+---
+
+## 🔄 GIT & VERSION CONTROL
+
+### Commit Message Format (Conventional Commits)
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+
+Types: feat, fix, docs, style, refactor, perf, test, chore, ci
+Scope: thai-invoices, validation, auth, database, websocket
+Example: feat(thai-invoices): add multi-page document support
+```
+
+### Branch Strategy
+- `main`: production-ready code (protected)
+- `develop`: integration branch
+- `feature/*`: feature branches
+- `hotfix/*`: production fixes
+- `release/*`: release candidates
+
+### Code Review Checklist
+- [ ] TypeScript strict mode passes
+- [ ] Tests pass (unit + integration)
+- [ ] Linting passes (0 errors/warnings)
+- [ ] No console.logs (use logger)
+- [ ] Types for all function parameters
+- [ ] Error handling present
+- [ ] API docs updated
+- [ ] No hardcoded values
+- [ ] Performance impact considered
+
+---
+
+## 📞 SUPPORT & ESCALATION
+
+### Common Issues & Solutions
+- **See:** TROUBLESHOOTING.md in docs/
+
+### Getting Help
+1. Check documentation (docs/ folder)
+2. Search existing GitHub issues
+3. Review architecture diagrams (ARCHITECTURE.md)
+4. Ask in team Slack with `@ai` for quick questions
+5. Create GitHub issue with reproduction steps
+
+---
+
+## ✅ PRE-LAUNCH CHECKLIST
+
+- [ ] All tests pass (100% suite)
+- [ ] Code coverage ≥ 80%
+- [ ] Security audit completed
+- [ ] Performance testing done (load test)
+- [ ] Database migrations tested
+- [ ] Deployment automation verified
+- [ ] Monitoring/alerting configured
+- [ ] Backup/recovery tested
+- [ ] Documentation complete & accurate
+- [ ] Team training completed
+
+---
+
+**This ruleset is the source of truth for all development. When in doubt, refer back to these rules.**

@@ -1,0 +1,93 @@
+================================================================
+SETUP VERIFICATION — invoice_extractor_v1
+================================================================
+Run date: 2026-05-13
+
+VERIFICATION CHECKS
+-------------------
+[PASS] .cursorrules present at root
+[PASS] .cursor/rules/00-core.md present
+[PASS] .cursor/AGENTS.md present
+[WARN] backend/src/services/thai-extraction-prompt.ts is a PLACEHOLDER
+[WARN] backend/src/db/thai-invoice-schema.ts is a PLACEHOLDER
+[PASS] 40+ folders created (actual: 41)
+[PASS] SETUP_REPORTS/ folder created with 5 reports
+[PASS] README.md present
+[PASS] .gitignore present
+[PASS] CI workflow file present
+[PASS] Docker build files present
+[PASS] dev/setup scripts present
+[PASS] No errors during scaffold
+
+FOLDER TREE (depth limited)
+---------------------------
+invoice_extractor_v1/
+├── .cursor/
+│   ├── AGENTS.md
+│   ├── CURSOR_RULES_GUIDE.md
+│   ├── CURSOR_RULES_INDEX.md
+│   ├── rules/
+│   │   └── 00-core.md
+│   └── skills/
+├── .cursorrules
+├── .env.example
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+├── .gitignore
+├── README.md
+├── SETUP_REPORTS/
+│   ├── file_inventory.txt
+│   ├── next_steps.txt
+│   ├── project_manifest.txt
+│   ├── setup_checklist.txt
+│   └── setup_verification.txt
+├── backend/
+│   ├── .env.example
+│   ├── src/
+│   │   ├── config/
+│   │   ├── db/
+│   │   │   └── thai-invoice-schema.ts  *placeholder*
+│   │   ├── middleware/
+│   │   ├── routes/
+│   │   ├── services/
+│   │   │   └── thai-extraction-prompt.ts  *placeholder*
+│   │   ├── types/
+│   │   ├── utils/
+│   │   └── websocket/
+│   └── tests/
+│       ├── integration/
+│       ├── setup/
+│       └── unit/
+├── docker/
+│   ├── Dockerfile.backend
+│   ├── Dockerfile.frontend
+│   └── docker-compose.yml
+├── docs/
+│   ├── API.md
+│   └── ARCHITECTURE.md
+├── frontend/
+│   ├── .env.example
+│   ├── public/
+│   ├── src/
+│   │   ├── assets/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── services/
+│   │   ├── styles/
+│   │   ├── types/
+│   │   └── utils/
+│   └── tests/
+│       ├── e2e/
+│       ├── fixtures/
+│       └── unit/
+├── scripts/
+│   ├── setup.sh
+│   └── start-dev.sh
+└── tests/
+    ├── e2e/
+    └── performance/
+
+OVERALL STATUS: SCAFFOLD COMPLETE
+                (2 placeholder files require user replacement)
+================================================================

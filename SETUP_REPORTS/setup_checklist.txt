@@ -1,0 +1,26 @@
+================================================================
+SETUP CHECKLIST — invoice_extractor_v1
+================================================================
+
+[x] .cursorrules at root
+[x] .cursor/rules/00-core.md
+[x] .cursor/AGENTS.md
+[ ] backend/src/services/thai-extraction-prompt.ts   (PLACEHOLDER — replace with real file)
+[ ] backend/src/db/thai-invoice-schema.ts            (PLACEHOLDER — replace with real file)
+[x] 40+ folders created                              (41 total)
+[x] 25+ files created                                (20 real + 27 .gitkeep = 47)
+[x] SETUP_REPORTS/ folder exists
+[x] project_manifest.txt has content
+[x] setup_checklist.txt has next steps               (this file)
+[x] file_inventory.txt lists all files
+[x] next_steps.txt has instructions
+[x] No error messages
+
+ACTIONS REQUIRED BY USER:
+  1. Replace placeholder thai-extraction-prompt.ts with real file
+  2. Replace placeholder thai-invoice-schema.ts with real file
+  3. Run: git init && git add . && git commit -m "chore: initial scaffold"
+  4. Copy backend/.env.example -> backend/.env and fill in credentials
+  5. Copy frontend/.env.example -> frontend/.env and fill in URL
+  6. Run scripts/setup.sh to install npm dependencies
+================================================================

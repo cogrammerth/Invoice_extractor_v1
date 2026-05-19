@@ -1,0 +1,90 @@
+================================================================
+PROJECT MANIFEST — invoice_extractor_v1
+================================================================
+Generated:        2026-05-13
+Project Root:     C:\Synnex Project\Invoice_extractor_v1\
+Setup Method:     Cowork automated scaffolding
+Status:           SCAFFOLD COMPLETE (with notes)
+
+================================================================
+STARTER FILE PLACEMENT
+================================================================
+[OK]   .cursorrules                                          (root)
+[OK]   .cursor/rules/00-core.md
+[OK]   .cursor/AGENTS.md
+[MISS] backend/src/services/thai-extraction-prompt.ts        *placeholder created*
+[MISS] backend/src/db/thai-invoice-schema.ts                 *placeholder created*
+
+NOTE: Only 3 of the 5 expected starter files were present in the
+project folder at setup time. Placeholder TypeScript files have
+been generated for the two missing files. Replace them with the
+real content before running the backend.
+
+Missing files:
+  - thai-extraction-prompt.ts  (expected ~500 lines, 14-field
+    Gemini Vision extraction prompt)
+  - thai-invoice-schema.ts     (expected ~400 lines, 9-table
+    PostgreSQL schema definition)
+
+Extra files found and preserved under .cursor/:
+  - CURSOR_RULES_GUIDE.md
+  - CURSOR_RULES_INDEX.md
+
+================================================================
+STRUCTURE SUMMARY
+================================================================
+Folders created:   41
+Files created:     20 (excluding .gitkeep markers)
+.gitkeep markers:  27
+
+================================================================
+TOP-LEVEL LAYOUT
+================================================================
+invoice_extractor_v1/
+  .cursor/           Cursor IDE config (rules, agent instructions)
+  .cursorrules       Main Cursor ruleset
+  .github/workflows  CI pipeline
+  .gitignore
+  .env.example
+  README.md
+  backend/           Node/TypeScript API server
+  frontend/          Web UI
+  docker/            Container build files + compose
+  docs/              API.md, ARCHITECTURE.md (stubs)
+  tests/             E2E + performance tests
+  scripts/           setup.sh, start-dev.sh
+  SETUP_REPORTS/     (this folder)
+
+================================================================
+SUPPORTING FILES GENERATED
+================================================================
+Root:
+  - README.md
+  - .gitignore
+  - .env.example
+
+Backend:
+  - backend/.env.example
+
+Frontend:
+  - frontend/.env.example
+
+Docker:
+  - docker/Dockerfile.backend
+  - docker/Dockerfile.frontend
+  - docker/docker-compose.yml
+
+Scripts:
+  - scripts/setup.sh
+  - scripts/start-dev.sh
+
+Docs:
+  - docs/API.md
+  - docs/ARCHITECTURE.md
+
+CI:
+  - .github/workflows/ci.yml
+
+================================================================
+END OF MANIFEST
+================================================================

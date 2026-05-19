@@ -1,0 +1,84 @@
+================================================================
+FILE INVENTORY — invoice_extractor_v1
+================================================================
+Generated: 2026-05-13
+
+ROOT
+  .cursorrules                                23,791 bytes  (starter)
+  .env.example                                  generated
+  .gitignore                                    generated
+  README.md                                     generated
+
+.cursor/
+  AGENTS.md                                   11,556 bytes  (starter)
+  CURSOR_RULES_GUIDE.md                       10,884 bytes  (extra)
+  CURSOR_RULES_INDEX.md                       12,105 bytes  (extra)
+  rules/00-core.md                            14,620 bytes  (starter)
+  skills/.gitkeep
+
+.github/
+  workflows/ci.yml                              generated
+
+backend/
+  .env.example                                  generated
+  src/
+    config/.gitkeep
+    db/thai-invoice-schema.ts                   PLACEHOLDER
+    middleware/.gitkeep
+    routes/.gitkeep
+    services/thai-extraction-prompt.ts          PLACEHOLDER
+    types/.gitkeep
+    utils/.gitkeep
+    websocket/.gitkeep
+  tests/
+    integration/.gitkeep
+    setup/.gitkeep
+    unit/.gitkeep
+
+frontend/
+  .env.example                                  generated
+  public/.gitkeep
+  src/
+    assets/.gitkeep
+    components/.gitkeep
+    hooks/.gitkeep
+    services/.gitkeep
+    styles/.gitkeep
+    types/.gitkeep
+    utils/.gitkeep
+  tests/
+    e2e/.gitkeep
+    fixtures/.gitkeep
+    unit/.gitkeep
+
+docker/
+  Dockerfile.backend                            generated
+  Dockerfile.frontend                           generated
+  docker-compose.yml                            generated
+
+docs/
+  API.md                                        generated (stub)
+  ARCHITECTURE.md                               generated (stub)
+
+scripts/
+  setup.sh                                      generated
+  start-dev.sh                                  generated
+
+tests/
+  e2e/.gitkeep
+  performance/.gitkeep
+
+SETUP_REPORTS/
+  project_manifest.txt
+  setup_checklist.txt
+  file_inventory.txt    (this file)
+  next_steps.txt
+  setup_verification.txt
+
+================================================================
+TOTALS
+  Folders:         41
+  Real files:      20
+  .gitkeep:        27
+  Grand total:     47 files
+================================================================

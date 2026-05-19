@@ -1,0 +1,74 @@
+Instructions for Data Extraction
+1. Check the corner of the paper
+Please read the attached image and extract the number that appears after the text “No.”
+The number may be written as 01, 13, 124, 134, 1234, etc.
+Only extract the numeric value following “No.” (without any letters or spaces).
+If there is no number, return it as an empty value.
+2. Look for the text “E-TAX” above the barcode
+If “E-TAX” is not found, write “Non E-TAX”.
+If it appears, write “E-TAX”.
+3. Read the Invoice Number (Critical data)
+Usually found near the barcode or invoice header.
+4. Read the value of “CUST CODE”
+Extract the CUST CODE from the image exactly as printed.
+Do not modify or correct any characters.
+Do not guess unclear text.
+Return the value exactly as seen, character for character.
+5. Check the “PAGES” section
+Record it (e.g., 1/1, 2/2, 3/3, etc.) and note if it’s the last page.
+6. Read the values of “CURRENCY” and “PAYMENT METHOD”
+7. Find the Net Total (Total Amount)
+Record the exact number shown on the document.
+8. Look for the “Delivery Instructions” section
+Write down all the text that appears under this header.
+
+Please be careful when reading, as it is in Thai. It needs to sound natural, like a native speaker, without any distortion.
+9. Check Keyword “ชำระเงินโดย” section
+Please analyze the attached image and extract payment information according to the following rules:
+Identify which checkbox is ticked (เงินสด / บัตรเครดิต / เงินโอน / เช็ค).
+If “เงินโอน” is selected, extract the text written after it.
+If “เช็ค” is selected, extract the “เลขที่เช็ค” (cheque number) and “วันที่เช็ค” (cheque date).
+Always extract the “จำนวนเงิน” (amount of money) if it is written.
+10. Read the ITEM DESCRIPTION
+Extract the value under ITEM DESCRIPTION exactly as printed.
+Do not correct spelling, spacing, or special characters.
+If there are multiple item descriptions, extract all of them in the same order as shown in the document.
+If part of the text is unclear or blocked, only return the readable part and leave the rest blank.
+Do not guess missing words.
+11. Check for signatures and dates at RECEIVED BY
+If present, write “Yes”.
+If absent, write “No”.
+12. Check for signatures and dates at DELIVERY BY
+If present, write “Yes”.
+If absent, write “No”.
+13.Check this document image and determine whether there is a "stamp" present or not, considering that:
+- Stamps are typically blue in color
+- A stamp can appear anywhere on the A4 document
+Look for characteristics of a real stamp such as shape, ink edges, and uneven ink intensity.
+After checking, respond with only one of the following:
+"Stamp present" or "No stamp"
+Do not provide any additional explanation.
+14.You will be given a set of scanned document images.
+Your task is:
+Analyze all images and group the documents by "Document Number".
+Important details:
+1.Each image represents one page of a document.
+2.The Document Number is located at the top of the document (e.g., INVOICE).
+3.The page number must be taken only from the bottom-right corner.
+4.One document number may have multiple pages (e.g., page 1, 2, 3, or more).
+What you need to do:
+•Read the Document Number from the top of the document (INVOICE).
+•Read the page number only from the bottom-right corner.
+•Group images that have the same Document Number together.
+•Sort the page numbers in ascending order.
+Output format:
+Display the results as a list, specifying the Document Number and the pages found.
+Example:
+Document Number IV422250803132: Pages 1, 2, 3
+Document Number IV123456789: Page 1
+Rules:
+•Use only the information visible in the images.
+•If the page number is unclear, skip that page.
+•Do not use any other numbers in the document as the page number (only use the bottom-right corner).
+•Do not provide explanations.
+•Show only the final result.
