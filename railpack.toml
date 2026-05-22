@@ -1,5 +1,8 @@
+[install]
+cmd = "npm ci --include=dev"
+
 [build]
-cmd = "npm ci --include=dev && npm run build:backend && npm run build:frontend"
+cmd = "npm run build:backend && npm run build:frontend"
 
 [start]
 cmd = "npm run start"
