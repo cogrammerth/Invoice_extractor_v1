@@ -2,9 +2,13 @@
  * HTTP server bootstrap — listens on PORT and handles graceful shutdown.
  */
 
+import { readdirSync, readFileSync } from 'node:fs';
 import { createServer } from 'node:http';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import Anthropic from '@anthropic-ai/sdk';
+import pg from 'pg';
 
 import { createApp } from './app.js';
 import { env } from './config/env.js';
@@ -30,7 +34,57 @@ const extractionService = new ClaudeExtractionService({
 const { app, pool } = createApp({ env, extractionService });
 const httpServer = createServer(app);
 
+/**
+ * Run all SQL migrations from `dist/db/migrations/` (copied there by the
+ * build's `copy:assets` step) using a dedicated pg.Client so the pool is
+ * not consumed during startup.
+ *
+ * Enabled when `RUN_MIGRATIONS_ON_START=true` (or `1`).
+ */
+async function runMigrations(): Promise<void> {
+  const serverDir = path.dirname(fileURLToPath(import.meta.url));
+  const migrationsDir = path.join(serverDir, 'db', 'migrations');
+
+  const files = readdirSync(migrationsDir)
+    .filter((f) => f.endsWith('.sql'))
+    .sort((a, b) => a.localeCompare(b));
+
+  if (files.length === 0) {
+    logger.warn('RUN_MIGRATIONS_ON_START is enabled but no migration files found', {
+      migrationsDir,
+    });
+    return;
+  }
+
+  const client = new pg.Client({ connectionString: env.DATABASE_URL });
+  await client.connect();
+  const applied: string[] = [];
+  try {
+    for (const file of files) {
+      const sql = readFileSync(path.join(migrationsDir, file), 'utf-8');
+      await client.query(sql);
+      applied.push(file);
+    }
+  } finally {
+    await client.end().catch(() => undefined);
+  }
+
+  logger.info('Migrations applied', { applied });
+}
+
 async function startServer(): Promise<void> {
+  if (env.RUN_MIGRATIONS_ON_START) {
+    logger.info('Running database migrations before startup…');
+    try {
+      await runMigrations();
+    } catch (error: unknown) {
+      logger.error('Migration failed — aborting startup', {
+        message: error instanceof Error ? error.message : String(error),
+      });
+      process.exit(1);
+    }
+  }
+
   try {
     await ensureExtractionsSchema(pool);
   } catch (error: unknown) {

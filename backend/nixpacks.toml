@@ -1,0 +1,8 @@
+[build]
+cmds = ["npm ci --include=dev", "npm run build"]
+
+[build.env]
+NODE_VERSION = "24"
+
+[start]
+cmd = "node dist/server.js"

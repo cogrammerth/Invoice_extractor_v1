@@ -136,6 +136,17 @@ export const envSchema = z.object({
   GOOGLE_CLIENT_SECRET: z.string().optional(),
 
   /**
+   * When `true` (or `1`), the server runs all SQL migrations from
+   * `src/db/migrations/` before accepting traffic. Useful for Railway
+   * deployments where a separate migration step is inconvenient.
+   * Defaults to `false` — run `npm run db:migrate` manually instead.
+   */
+  RUN_MIGRATIONS_ON_START: z
+    .enum(['true', 'false', '1', '0'])
+    .transform((v) => v === 'true' || v === '1')
+    .default('false'),
+
+  /**
    * Estimated USD cost per 1M input tokens (for usage dashboard estimates).
    * Defaults approximate Claude Sonnet-class pricing; override per deployment.
    */
