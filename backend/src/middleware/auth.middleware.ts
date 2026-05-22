@@ -93,14 +93,14 @@ export function createJwtAuthMiddleware(
         return;
       }
 
-      const rawRole = payload.role;
+      const rawRole = payload['role'];
       const role: UserRole =
         typeof rawRole === 'string' &&
         (USER_ROLES as readonly string[]).includes(rawRole)
           ? (rawRole as UserRole)
           : 'operator';
 
-      const emailClaim = payload.email;
+      const emailClaim = payload['email'];
       const email =
         typeof emailClaim === 'string' && emailClaim.trim().length > 0
           ? emailClaim.trim().toLowerCase()

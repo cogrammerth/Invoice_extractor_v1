@@ -71,7 +71,7 @@ export function createAuthRouter(deps: CreateAuthRouterDeps): Router {
 
   const startOAuth =
     (provider: OAuthProvider) =>
-    (req: Request, res: Response, next: NextFunction): void => {
+    (_req: Request, res: Response, next: NextFunction): void => {
       try {
         const callbackUrl = backendOAuthCallbackUrl(deps.publicApiBaseUrl, provider);
         const url = deps.oauthService.getAuthorizationUrl(provider, callbackUrl);
@@ -88,9 +88,10 @@ export function createAuthRouter(deps: CreateAuthRouterDeps): Router {
     (provider: OAuthProvider) =>
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       try {
-        const code = typeof req.query.code === 'string' ? req.query.code : '';
-        const state = typeof req.query.state === 'string' ? req.query.state : '';
-        const oauthError = typeof req.query.error === 'string' ? req.query.error : '';
+        const code = typeof req.query['code'] === 'string' ? req.query['code'] : '';
+        const state = typeof req.query['state'] === 'string' ? req.query['state'] : '';
+        const oauthError =
+          typeof req.query['error'] === 'string' ? req.query['error'] : '';
 
         if (oauthError.length > 0) {
           const failUrl = new URL(deps.frontendAuthCallbackUrl);

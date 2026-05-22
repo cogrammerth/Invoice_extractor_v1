@@ -52,6 +52,12 @@ export function createAuthService(
   config: AuthServiceConfig,
 ): AuthService {
   const signAccessToken = (user: AuthUser): string => {
+    const signOptions: jwt.SignOptions = {
+      algorithm: 'HS256',
+      issuer: config.jwtIssuer,
+      audience: config.jwtAudience,
+      expiresIn: config.accessExpiresIn as jwt.SignOptions['expiresIn'],
+    };
     return jwt.sign(
       {
         sub: user.id,
@@ -59,12 +65,7 @@ export function createAuthService(
         email: user.email,
       },
       config.jwtSecret,
-      {
-        algorithm: 'HS256',
-        issuer: config.jwtIssuer,
-        audience: config.jwtAudience,
-        expiresIn: config.accessExpiresIn,
-      },
+      signOptions,
     );
   };
 

@@ -58,13 +58,15 @@ function verifyState(token: string, secret: string): OAuthStatePayload {
     throw new HttpResponseError(400, 'INVALID_OAUTH_STATE', 'Invalid OAuth state');
   }
   const p = decoded as jwt.JwtPayload;
-  if (p.provider !== 'microsoft' && p.provider !== 'google') {
+  const provider = p['provider'];
+  if (provider !== 'microsoft' && provider !== 'google') {
     throw new HttpResponseError(400, 'INVALID_OAUTH_STATE', 'Invalid OAuth state');
   }
-  if (typeof p.nonce !== 'string' || p.nonce.length < 8) {
+  const nonce = p['nonce'];
+  if (typeof nonce !== 'string' || nonce.length < 8) {
     throw new HttpResponseError(400, 'INVALID_OAUTH_STATE', 'Invalid OAuth state');
   }
-  return { provider: p.provider, nonce: p.nonce };
+  return { provider, nonce };
 }
 
 async function exchangeToken(
