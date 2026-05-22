@@ -43,6 +43,15 @@ export const envSchema = z.object({
 
   PORT: z.coerce.number().int().positive().max(65_535).default(3000),
 
+  /**
+   * When true, apply SQL migrations from `dist/db/migrations` before serving.
+   * Useful on Railway (`RUN_MIGRATIONS_ON_START=true`). Default false for local dev.
+   */
+  RUN_MIGRATIONS_ON_START: z
+    .string()
+    .default('false')
+    .transform((s) => ['true', '1', 'yes'].includes(s.trim().toLowerCase())),
+
   DATABASE_URL: z
     .string()
     .min(1, 'DATABASE_URL is required')

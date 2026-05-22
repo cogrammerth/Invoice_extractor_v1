@@ -1,0 +1,12 @@
+# Railway config for the API service.
+# In Railway: create a service with Root Directory = backend (this folder).
+
+[build]
+builder = "NIXPACKS"
+buildCommand = "npm ci && npm run build"
+
+[deploy]
+startCommand = "npm start"
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"

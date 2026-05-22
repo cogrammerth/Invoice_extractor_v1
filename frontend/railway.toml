@@ -1,0 +1,11 @@
+# Railway config for the SPA service.
+# In Railway: create a service with Root Directory = frontend (this folder).
+# Set build-time vars: VITE_API_URL, VITE_APP_NAME
+
+[build]
+builder = "NIXPACKS"
+buildCommand = "npm ci && npm run build"
+
+[deploy]
+startCommand = "npm start"
+restartPolicyType = "ON_FAILURE"

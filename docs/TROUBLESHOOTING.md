@@ -46,13 +46,28 @@ If the message mentions issuer/audience, verify `JWT_ISSUER` and `JWT_AUDIENCE` 
 
 ## Reset all extraction history (truncate)
 
-**Removes every row** in `extractions` (not a single invoice). From repo root or `backend/`:
+**Removes every row** in `extractions` (not a single invoice).
+
+### Step 1 — See which database the app uses
+
+```bash
+cd backend
+npm run db:count
+```
+
+Check `databaseUrl` (e.g. `tramway.proxy.rlwy.net` = Railway). Row counts must match what you see in the app.
+
+### Step 2 — Truncate that same database
+
+From repo root or `backend/`:
 
 ```bash
 npm run db:truncate
 ```
 
-Also delete stored invoice images:
+The script prints `before` / `after` counts. `after.extractions` should be `0`.
+
+Also delete stored invoice images on disk (History can still show rows from DB until you refresh; empty DB + old files in `uploads/` is confusing):
 
 ```bash
 npm run db:truncate -- --uploads
@@ -62,6 +77,22 @@ Also remove login users (then re-seed):
 
 ```bash
 npm run db:truncate -- --users --uploads
+```
+
+### Still see data in the UI?
+
+| Cause | Fix |
+|-------|-----|
+| SQL run in Railway on **wrong** Postgres service | Use the DB linked to your backend service’s `DATABASE_URL` |
+| **Deployed** Railway API uses different env than local `.env` | Truncate via Railway Query on **that** Postgres, or run `npm run db:truncate` only affects local `.env` URL |
+| Looking at **files** in `backend/uploads/` | Run with `--uploads` or delete files manually |
+| Browser cache | Hard refresh (Ctrl+F5) on History |
+| Only **users** remain | Normal — `db:truncate` does not remove users unless you pass `--users` |
+
+Raw SQL (same effect as truncate extractions):
+
+```sql
+TRUNCATE TABLE extractions RESTART IDENTITY;
 ```
 
 Blocked when `NODE_ENV=production` unless you pass `--force` (avoid in prod).

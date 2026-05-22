@@ -1,0 +1,13 @@
+# Ensures devDependencies (tsc, copyfiles) are available during the build phase.
+
+[phases.setup]
+nixPkgs = ["nodejs_24"]
+
+[phases.install]
+cmds = ["npm ci --include=dev"]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "npm start"

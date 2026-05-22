@@ -1,19 +1,29 @@
 /**
  * Truncate application data tables (development / reset).
  *
+ * Uses DATABASE_URL from backend/.env (same as the running API).
+ *
  * Usage (from backend/):
+ *   npm run db:count                 # show host + row counts (run first)
  *   npm run db:truncate              # TRUNCATE extractions only
- *   npm run db:truncate -- --uploads # also delete files under UPLOAD_DIR
+ *   npm run db:truncate -- --uploads # also delete image files under UPLOAD_DIR
  *   npm run db:truncate -- --users   # also TRUNCATE users (re-seed after)
+ *   npm run db:truncate -- --legacy  # also old Railway tables (invoices, etc.)
  *
  * Flags:
  *   --confirm   Required (also set by npm script)
- *   --uploads   Remove image files under UPLOAD_DIR (not subfolders like node_modules)
+ *   --uploads   Remove image files under UPLOAD_DIR
  *   --users     Truncate users table (login accounts)
+ *   --legacy    Truncate legacy tables if present (invoices, invoice_details, abnormal_cases)
  *   --force     Allow when NODE_ENV=production (dangerous)
- *
- * Does NOT drop tables or re-run migrations.
  */
+
+/** Older schema on some Railway DBs — not used by current app code. */
+const LEGACY_TABLES = [
+  'invoice_details',
+  'abnormal_cases',
+  'invoices',
+] as const;
 
 import { readdir, rm, stat } from 'node:fs/promises';
 import path from 'node:path';
@@ -36,16 +46,30 @@ function loadEnv(): void {
   }
 }
 
+function redactDatabaseUrl(connectionString: string): string {
+  try {
+    const u = new URL(connectionString);
+    if (u.password.length > 0) {
+      u.password = '****';
+    }
+    return u.toString();
+  } catch {
+    return connectionString.replace(/:[^:@]+@/, ':****@');
+  }
+}
+
 function parseArgs(argv: readonly string[]): {
   confirm: boolean;
   uploads: boolean;
   users: boolean;
+  legacy: boolean;
   force: boolean;
 } {
   return {
     confirm: argv.includes('--confirm'),
     uploads: argv.includes('--uploads'),
     users: argv.includes('--users'),
+    legacy: argv.includes('--legacy'),
     force: argv.includes('--force'),
   };
 }
@@ -54,6 +78,40 @@ function scheduleExit(code: number): void {
   setTimeout(() => {
     process.exit(code);
   }, EXIT_DEFER_MS);
+}
+
+async function tableExists(client: pg.Client, tableName: string): Promise<boolean> {
+  const r = await client.query<{ exists: boolean }>(
+    `SELECT EXISTS (
+       SELECT 1 FROM information_schema.tables
+       WHERE table_schema = 'public' AND table_name = $1
+     ) AS exists`,
+    [tableName],
+  );
+  return r.rows[0]?.exists === true;
+}
+
+async function countTable(client: pg.Client, tableName: string): Promise<number> {
+  const safe = /^[a-z_][a-z0-9_]*$/i.test(tableName);
+  if (!safe) return 0;
+  const r = await client.query<{ n: number }>(
+    `SELECT COUNT(*)::int AS n FROM "${tableName.replace(/"/g, '""')}"`,
+  );
+  return r.rows[0]?.n ?? 0;
+}
+
+async function countAllTables(
+  client: pg.Client,
+  includeLegacy: boolean,
+): Promise<Record<string, number>> {
+  const names = ['extractions', 'users', ...(includeLegacy ? [...LEGACY_TABLES] : [])];
+  const out: Record<string, number> = {};
+  for (const name of names) {
+    if (await tableExists(client, name)) {
+      out[name] = await countTable(client, name);
+    }
+  }
+  return out;
 }
 
 async function removeImageFilesInDir(dir: string): Promise<number> {
@@ -94,10 +152,19 @@ async function main(): Promise<number> {
       [
         'Refusing to run without --confirm.',
         '',
-        'Examples:',
+        'Step 1 — see which database and how many rows:',
+        '  npm run db:count',
+        '',
+        'Step 2 — truncate (must match the app DATABASE_URL in backend/.env):',
         '  npm run db:truncate',
         '  npm run db:truncate -- --uploads',
         '  npm run db:truncate -- --users --uploads',
+        '  npm run db:truncate -- --legacy   # clears invoices / invoice_details / abnormal_cases on Railway',
+        '  npm run db:tables                 # list every table + row counts',
+        '',
+        'If History still shows rows, you may be hitting a different API/DB',
+        '(e.g. Railway deploy env ≠ local .env). Truncate in Railway Query',
+        'using the same Postgres service as your deployed backend.',
       ].join('\n'),
     );
     return 1;
@@ -121,17 +188,33 @@ async function main(): Promise<number> {
 
   const client = new pg.Client({ connectionString: dbUrl });
   const truncated: string[] = [];
+  let before: Record<string, number> = {};
+  let after: Record<string, number> = {};
 
   try {
     await client.connect();
+    before = await countAllTables(client, flags.legacy);
 
-    await client.query('TRUNCATE TABLE extractions');
+    if (flags.legacy) {
+      for (const table of LEGACY_TABLES) {
+        if (await tableExists(client, table)) {
+          await client.query(
+            `TRUNCATE TABLE "${table.replace(/"/g, '""')}" RESTART IDENTITY CASCADE`,
+          );
+          truncated.push(table);
+        }
+      }
+    }
+
+    await client.query('TRUNCATE TABLE extractions RESTART IDENTITY');
     truncated.push('extractions');
 
     if (flags.users) {
-      await client.query('TRUNCATE TABLE users');
+      await client.query('TRUNCATE TABLE users RESTART IDENTITY CASCADE');
       truncated.push('users');
     }
+
+    after = await countAllTables(client, flags.legacy);
   } catch (e: unknown) {
     console.error('Truncate failed:', e instanceof Error ? e.message : String(e));
     return 1;
@@ -150,15 +233,24 @@ async function main(): Promise<number> {
   }
 
   console.log(
-    JSON.stringify({
-      ok: true,
-      truncated,
-      uploadsCleared: flags.uploads,
-      imageFilesRemoved: filesRemoved,
-      hint: flags.users
-        ? 'Users were removed — run: npm run user:seed -- <email> <password> [role]'
-        : undefined,
-    }),
+    JSON.stringify(
+      {
+        ok: true,
+        databaseUrl: redactDatabaseUrl(dbUrl),
+        before,
+        after,
+        truncated,
+        uploadsCleared: flags.uploads,
+        imageFilesRemoved: filesRemoved,
+        hint: flags.legacy
+          ? 'Legacy tables (invoices, etc.) cleared. Current app History uses extractions only.'
+          : flags.users
+            ? 'Users were removed — run: npm run user:seed -- <email> <password> [role]'
+            : 'Users kept. Railway UI may still show invoices until you run with --legacy.',
+      },
+      null,
+      2,
+    ),
   );
   return 0;
 }

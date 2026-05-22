@@ -9,6 +9,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { createApp } from './app.js';
 import { env } from './config/env.js';
 import { ensureExtractionsSchema } from './db/ensure-extractions-schema.js';
+import { runMigrations } from './db/run-migrations.js';
 import { ClaudeExtractionService } from './services/claude-extraction-service.js';
 import { logger } from './utils/logger.js';
 
@@ -32,6 +33,10 @@ const httpServer = createServer(app);
 
 async function startServer(): Promise<void> {
   try {
+    if (env.RUN_MIGRATIONS_ON_START) {
+      const applied = await runMigrations(pool);
+      logger.info('Database migrations applied on startup', { applied });
+    }
     await ensureExtractionsSchema(pool);
   } catch (error: unknown) {
     logger.error('Database schema check failed', {
@@ -40,9 +45,10 @@ async function startServer(): Promise<void> {
     process.exit(1);
   }
 
-  httpServer.listen(env.PORT, () => {
+  httpServer.listen(env.PORT, '0.0.0.0', () => {
     logger.info('Server started', {
       port: env.PORT,
+      host: '0.0.0.0',
       nodeEnv: env.NODE_ENV,
       claudeModel: env.CLAUDE_MODEL,
     });
