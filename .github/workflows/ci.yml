@@ -4,6 +4,7 @@ on:
   push:
     branches: [main, develop]
   pull_request:
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -31,6 +32,7 @@ jobs:
 
     env:
       NODE_ENV: test
+      NPM_CONFIG_PRODUCTION: "false"
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/invoice_extractor_test
       INTEGRATION_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/invoice_extractor_test
       JWT_SECRET: ci-github-actions-jwt-secret-min-32-chars
@@ -77,6 +79,9 @@ jobs:
   frontend:
     name: Frontend (typecheck + build)
     runs-on: ubuntu-latest
+
+    env:
+      NPM_CONFIG_PRODUCTION: "false"
 
     defaults:
       run:
