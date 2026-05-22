@@ -156,3 +156,108 @@ This repo includes per-service config so Railway can deploy without custom build
 | `Environment validation failed` | Set required vars from `backend/.env.example` |
 | `Table "extractions" does not exist` | Enable `RUN_MIGRATIONS_ON_START=true` or run migrations |
 | CORS errors | Set `ALLOWED_ORIGIN` to exact frontend origin |
+
+## Railway with Docker (no GitHub)
+
+Deploy from your PC using Docker — no GitHub connection required.
+
+### Architecture
+
+| Railway service | Image | Dockerfile |
+|-----------------|-------|------------|
+| PostgreSQL | Plugin | — |
+| API | `invoice-api` | `docker/Dockerfile.backend` |
+| UI | `invoice-ui` | `docker/Dockerfile.frontend` |
+
+Build context is always the **repo root** (`.`).
+
+### A — Build and push to Docker Hub (recommended)
+
+**1. Install Docker Desktop** and log in:
+
+```bash
+docker login
+```
+
+**2. Build backend** (from repo root):
+
+```bash
+docker build -f docker/Dockerfile.backend -t YOUR_DOCKERHUB_USER/invoice-api:latest .
+```
+
+**3. Build frontend** (set your backend URL at build time):
+
+```bash
+docker build -f docker/Dockerfile.frontend ^
+  --build-arg VITE_API_URL=https://YOUR-BACKEND.up.railway.app ^
+  --build-arg VITE_APP_NAME="Thai Invoice Extractor" ^
+  -t YOUR_DOCKERHUB_USER/invoice-ui:latest .
+```
+
+On Linux/macOS use `\` instead of `^` for line continuation.
+
+**4. Push images:**
+
+```bash
+docker push YOUR_DOCKERHUB_USER/invoice-api:latest
+docker push YOUR_DOCKERHUB_USER/invoice-ui:latest
+```
+
+**5. On Railway:**
+
+1. New Project → **+ New** → **Database** → **PostgreSQL**
+2. **+ New** → **Empty Service** → **Deploy from Docker Hub**
+3. Image: `YOUR_DOCKERHUB_USER/invoice-api:latest`
+4. Add backend env vars (see Railway section above), especially `DATABASE_URL`, `RUN_MIGRATIONS_ON_START=true`
+5. **Networking** → Generate domain → set `PUBLIC_API_BASE_URL`
+6. Repeat for `YOUR_DOCKERHUB_USER/invoice-ui:latest` (no runtime secrets; API URL is baked in at build)
+7. Update backend `ALLOWED_ORIGIN` and `FRONTEND_AUTH_CALLBACK_URL` with frontend domain → redeploy API
+
+**6. Verify:**
+
+```text
+https://YOUR-BACKEND.up.railway.app/health
+```
+
+### B — Railway CLI + local Docker build
+
+```bash
+npm install -g @railway/cli
+railway login
+```
+
+Backend (link to a service first):
+
+```bash
+cd "path/to/Invoice_extractor_v1"
+railway link
+railway up --dockerfile docker/Dockerfile.backend
+```
+
+Frontend (replace API URL):
+
+```bash
+railway up --dockerfile docker/Dockerfile.frontend ^
+  --build-arg VITE_API_URL=https://YOUR-BACKEND.up.railway.app
+```
+
+Set variables in the Railway dashboard as in the Nixpacks section above.
+
+### C — Test full stack locally with Docker Compose
+
+```bash
+cd docker
+docker compose up --build
+```
+
+- API: http://localhost:3000
+- UI: http://localhost:8080
+- Configure `backend/.env` before starting (or use env vars in compose)
+
+### Docker notes
+
+- Backend reads `PORT` from the environment (Railway sets this automatically).
+- Frontend container runs `npm start` (`serve`) and listens on `$PORT`.
+- Rebuild the **frontend image** whenever `VITE_API_URL` changes.
+- Upload files under `UPLOAD_DIR` are ephemeral unless you add a Railway volume.
+

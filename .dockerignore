@@ -1,0 +1,14 @@
+# Repo root — used as `docker build` context (e.g. -f docker/Dockerfile.backend ..)
+
+**/node_modules
+**/.git
+**/.env
+**/.env.*
+!**/.env.example
+**/dist
+**/uploads
+**/.cursor
+**/SETUP_REPORTS
+**/coverage
+**/*.log
+.gitignore
