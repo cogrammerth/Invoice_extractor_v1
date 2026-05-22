@@ -1,5 +1,6 @@
 [build]
-cmd = "npm ci --include=dev && npm run build:backend && npm run build:frontend"
+root = "backend"
+cmds = ["npm ci --include=dev", "npm run build"]
 
 [start]
-cmd = "npm run start"
+cmd = "node dist/server.js"
