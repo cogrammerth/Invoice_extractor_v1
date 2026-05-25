@@ -72,6 +72,7 @@ Open `http://localhost:5173`, sign in, and upload a JPEG/PNG/WebP invoice.
 
 - [API reference](docs/API.md)
 - [Deployment](docs/DEPLOYMENT.md)
+- [Self-hosted server (VPS)](docs/SELF-HOSTED.md)
 - [Troubleshooting](docs/TROUBLESHOOTING.md)
 - [Architecture](docs/ARCHITECTURE.md) (overview)
 - [Implementation summary (May 2026)](docs/IMPLEMENTATION_SUMMARY_15May2026.md)

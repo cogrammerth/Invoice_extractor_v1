@@ -1,5 +1,11 @@
 # Deployment Guide
 
+| Target | Guide |
+|--------|--------|
+| **Your own VPS / dedicated server** | [Self-hosted server guide](./SELF-HOSTED.md) |
+| **Railway (Nixpacks or Docker)** | [Railway](#railway) below |
+| **Local full stack** | [Docker Compose](#docker-compose-full-stack) below |
+
 ## Prerequisites
 
 - Node.js **24.15+** LTS
