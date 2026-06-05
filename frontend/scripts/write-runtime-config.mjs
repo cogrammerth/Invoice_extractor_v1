@@ -11,7 +11,11 @@ const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.join(scriptDir, '..', 'dist');
 const outPath = path.join(distDir, 'runtime-config.json');
 
-const raw = process.env.API_URL ?? process.env.VITE_API_URL ?? '';
+const PRODUCTION_API_URL =
+  'https://invoice-api-production-3d13.up.railway.app';
+
+const raw =
+  process.env.API_URL ?? process.env.VITE_API_URL ?? PRODUCTION_API_URL;
 const apiUrl = raw.replace(/\/$/, '');
 
 if (!existsSync(distDir)) {

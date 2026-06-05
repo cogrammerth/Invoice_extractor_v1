@@ -1,8 +1,17 @@
 /**
- * Resolves API base URL: runtime-config.json (Railway) → Vite build env → localhost dev.
+ * Resolves API base URL: runtime-config.json → Vite build env → Railway production default → localhost dev.
  */
 
+import { PRODUCTION_API_URL } from './production-urls.js';
+
 let resolvedBase: string | null = null;
+
+function isRailwayUiHost(): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    window.location.hostname.endsWith('.up.railway.app')
+  );
+}
 
 function normalizeBase(url: string): string {
   return url.replace(/\/$/, '');
@@ -17,9 +26,12 @@ export async function initApiBase(): Promise<string> {
   try {
     const res = await fetch('/runtime-config.json', { cache: 'no-store' });
     if (res.ok) {
-      const json = (await res.json()) as { apiUrl?: string };
-      if (typeof json.apiUrl === 'string' && json.apiUrl.trim().length > 0) {
-        fromRuntime = normalizeBase(json.apiUrl.trim());
+      const contentType = res.headers.get('content-type') ?? '';
+      if (contentType.includes('application/json')) {
+        const json = (await res.json()) as { apiUrl?: string };
+        if (typeof json.apiUrl === 'string' && json.apiUrl.trim().length > 0) {
+          fromRuntime = normalizeBase(json.apiUrl.trim());
+        }
       }
     }
   } catch {
@@ -32,7 +44,11 @@ export async function initApiBase(): Promise<string> {
       ? normalizeBase(import.meta.env.VITE_API_URL)
       : '';
 
-  resolvedBase = fromRuntime || fromBuild || 'http://localhost:3000';
+  const fromProductionDefault =
+    isRailwayUiHost() ? normalizeBase(PRODUCTION_API_URL) : '';
+
+  resolvedBase =
+    fromRuntime || fromBuild || fromProductionDefault || 'http://localhost:3000';
   return resolvedBase;
 }
 

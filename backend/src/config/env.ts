@@ -25,6 +25,12 @@
 import { z } from 'zod';
 
 import { loadBackendDotenv } from './load-dotenv.js';
+import {
+  PRODUCTION_API_URL,
+  PRODUCTION_AUTH_CALLBACK_URL,
+  PRODUCTION_UI_URL,
+  resolveDeploymentUrl,
+} from './production-urls.js';
 
 loadBackendDotenv();
 
@@ -111,17 +117,33 @@ export const envSchema = z.object({
     .max(24 * 60)
     .default(15),
 
-  /** Frontend origin for CORS (Vite dev server default). */
-  ALLOWED_ORIGIN: z.string().url().default('http://localhost:5173'),
+  /** Frontend origin for CORS. On Railway, localhost defaults are replaced automatically. */
+  ALLOWED_ORIGIN: z
+    .string()
+    .optional()
+    .transform((s) =>
+      resolveDeploymentUrl(s, PRODUCTION_UI_URL, 'http://localhost:5173'),
+    ),
 
   /** Public backend URL for OAuth redirect_uri (no trailing slash). */
-  PUBLIC_API_BASE_URL: z.string().url().default('http://localhost:3000'),
+  PUBLIC_API_BASE_URL: z
+    .string()
+    .optional()
+    .transform((s) =>
+      resolveDeploymentUrl(s, PRODUCTION_API_URL, 'http://localhost:3000'),
+    ),
 
   /** SPA route that receives accessToken after OAuth (no trailing slash). */
   FRONTEND_AUTH_CALLBACK_URL: z
     .string()
-    .url()
-    .default('http://localhost:5173/auth/callback'),
+    .optional()
+    .transform((s) =>
+      resolveDeploymentUrl(
+        s,
+        PRODUCTION_AUTH_CALLBACK_URL,
+        'http://localhost:5173/auth/callback',
+      ),
+    ),
 
   /** Access JWT lifetime (jsonwebtoken expiresIn, e.g. 15m, 1h). */
   JWT_ACCESS_EXPIRES_IN: z.string().min(1).default('15m'),
