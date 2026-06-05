@@ -6,6 +6,7 @@ builder = "NIXPACKS"
 buildCommand = "npm run build"
 
 [deploy]
+preDeployCommand = "node run-migrations.mjs"
 startCommand = "npm start"
 healthcheckPath = "/health"
 healthcheckTimeout = 30
