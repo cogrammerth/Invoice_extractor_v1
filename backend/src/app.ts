@@ -11,6 +11,7 @@ import helmet from 'helmet';
 import type { Pool } from 'pg';
 
 import { type Env } from './config/env.js';
+import { isRunningOnRailway } from './config/production-urls.js';
 import { createPool } from './config/database.js';
 import { createExtractionQueries, type ExtractionQueries } from './db/extraction-queries.js';
 import type { ClaudeExtractionService } from './services/claude-extraction-service.js';
@@ -86,7 +87,21 @@ export function createApp(deps: CreateAppDeps): AppInstance {
   app.use(helmet());
   app.use(
     cors({
-      origin: env.ALLOWED_ORIGIN,
+      origin: (origin, callback) => {
+        if (origin === undefined) {
+          callback(null, true);
+          return;
+        }
+        if (origin === env.ALLOWED_ORIGIN) {
+          callback(null, origin);
+          return;
+        }
+        if (isRunningOnRailway() && origin.endsWith('.up.railway.app')) {
+          callback(null, origin);
+          return;
+        }
+        callback(new Error('Not allowed by CORS'));
+      },
       credentials: true,
       allowedHeaders: ['Authorization', 'Content-Type', 'Accept'],
       exposedHeaders: ['Content-Type'],
