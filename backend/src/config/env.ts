@@ -45,12 +45,17 @@ export const envSchema = z.object({
 
   /**
    * When true, apply SQL migrations from `dist/db/migrations` before serving.
-   * Useful on Railway (`RUN_MIGRATIONS_ON_START=true`). Default false for local dev.
+   * Defaults to true in production (Railway); set `false` to skip. Pre-deploy also runs migrations.
    */
   RUN_MIGRATIONS_ON_START: z
     .string()
-    .default('false')
-    .transform((s) => ['true', '1', 'yes'].includes(s.trim().toLowerCase())),
+    .optional()
+    .transform((s) => {
+      if (s !== undefined && s.trim() !== '') {
+        return ['true', '1', 'yes'].includes(s.trim().toLowerCase());
+      }
+      return process.env['NODE_ENV'] === 'production';
+    }),
 
   DATABASE_URL: z
     .string()

@@ -7,29 +7,17 @@
  * Roles: admin | operator | viewer
  */
 
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { existsSync } from 'node:fs';
-
-import dotenv from 'dotenv';
 import pg from 'pg';
 
 import { createAuthStack } from '../src/config/auth-factory.js';
 import { loadEnv } from '../src/config/env.js';
+import { loadBackendDotenv } from '../src/config/load-dotenv.js';
 import { createUserQueries } from '../src/db/user-queries.js';
 import { normalizeEmail } from '../src/utils/email.js';
 import type { UserRole } from '../src/types/auth.types.js';
 import { USER_ROLES } from '../src/types/auth.types.js';
 
-const scriptDir = path.dirname(fileURLToPath(import.meta.url));
-const envPath = path.resolve(scriptDir, '..', '.env');
-
-if (!existsSync(envPath)) {
-  console.error(`Missing ${envPath}`);
-  process.exit(1);
-}
-
-dotenv.config({ path: envPath, override: true });
+loadBackendDotenv();
 
 async function main(): Promise<void> {
   const emailArg = process.argv[2]?.trim();

@@ -1,6 +1,11 @@
 # AGENTS.md - Cursor Agent Instructions
 # How AI agents should handle autonomous coding tasks for Thai Invoice Extraction System
 
+## Deployment context
+
+- **Railway project:** `invoiceExtractor` (see `.cursor/railway.md`)
+- Do not use other Railway projects (`invoice_extractor`, etc.) unless the user says otherwise.
+
 ## Agent Operating Mode
 
 When using Cursor in Agent mode (@Agent), the AI should follow these instructions for autonomous task execution.

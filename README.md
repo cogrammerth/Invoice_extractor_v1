@@ -70,9 +70,12 @@ Open `http://localhost:5173`, sign in, and upload a JPEG/PNG/WebP invoice.
 
 ## Documentation
 
+- [**Deployment guide (HTML)**](docs/DEPLOY.html) — easy to read in browser
+- [Cursor + Railway MCP](docs/DEPLOY.md#cursor--railway-mcp) — manage deploys from Cursor
+- [Deployment guide (Markdown)](docs/DEPLOY.md) — Railway + GitHub, local Docker (LAN), VPS
 - [API reference](docs/API.md)
-- [Deployment](docs/DEPLOYMENT.md)
-- [Self-hosted server (VPS)](docs/SELF-HOSTED.md)
+- [Deployment reference](docs/DEPLOYMENT.md) — build commands, Railway Docker images
+- [Self-hosted server (VPS)](docs/SELF-HOSTED.md) — Nginx, TLS, bare metal
 - [Troubleshooting](docs/TROUBLESHOOTING.md)
 - [Architecture](docs/ARCHITECTURE.md) (overview)
 - [Implementation summary (May 2026)](docs/IMPLEMENTATION_SUMMARY_15May2026.md)

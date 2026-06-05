@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deployment Guide — Thai Invoice Extractor</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --accent: #0f766e;
+      --accent-light: #ccfbf1;
+      --code-bg: #0f172a;
+      --code-text: #e2e8f0;
+      --sidebar-w: 280px;
+      --radius: 10px;
+      --shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      font-size: 16px;
+      line-height: 1.65;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 1.5rem 1rem;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .sidebar h2 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin: 1.25rem 0 0.5rem;
+      padding-left: 0.5rem;
+    }
+
+    .sidebar h2:first-child { margin-top: 0; }
+
+    .sidebar a {
+      display: block;
+      padding: 0.35rem 0.5rem;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.9rem;
+      border-radius: 6px;
+    }
+
+    .sidebar a:hover { background: var(--accent-light); color: var(--accent); }
+
+    .brand {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--accent);
+      padding: 0 0.5rem 1rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0.5rem;
+    }
+
+    .brand span { display: block; font-size: 0.8rem; font-weight: 400; color: var(--muted); margin-top: 0.25rem; }
+
+    /* Main */
+    .main {
+      flex: 1;
+      max-width: 900px;
+      padding: 2rem 2.5rem 4rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin: 0 0 0.5rem;
+      line-height: 1.25;
+    }
+
+    .subtitle { color: var(--muted); font-size: 1.1rem; margin-bottom: 2rem; }
+
+    h2 {
+      font-size: 1.5rem;
+      margin: 2.5rem 0 1rem;
+      padding-top: 1rem;
+      border-top: 2px solid var(--border);
+    }
+
+    h2:first-of-type { border-top: none; padding-top: 0; }
+
+    h3 {
+      font-size: 1.15rem;
+      margin: 1.75rem 0 0.75rem;
+      color: var(--accent);
+    }
+
+    p { margin: 0.75rem 0; }
+
+    a { color: var(--accent); }
+
+    strong { font-weight: 600; }
+
+    /* Path badges */
+    .paths {
+      display: grid;
+      gap: 0.75rem;
+      margin: 1.5rem 0;
+    }
+
+    .path-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.5rem 1rem;
+      align-items: start;
+    }
+
+    .path-card .badge {
+      grid-row: span 2;
+      background: var(--accent);
+      color: white;
+      font-weight: 700;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+
+    .path-card h4 { margin: 0; font-size: 1rem; }
+    .path-card p { margin: 0; font-size: 0.9rem; color: var(--muted); grid-column: 2; }
+    .path-card a { font-size: 0.9rem; grid-column: 2; }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.92rem;
+      background: var(--surface);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.6rem 0.85rem;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f1f5f9;
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) td { background: #fafbfc; }
+
+    code {
+      font-family: Consolas, "Cascadia Code", monospace;
+      font-size: 0.88em;
+      background: #f1f5f9;
+      padding: 0.15em 0.4em;
+      border-radius: 4px;
+      color: #0f172a;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 1rem 1.25rem;
+      border-radius: var(--radius);
+      overflow-x: auto;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      margin: 1rem 0;
+      box-shadow: var(--shadow);
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+      font-size: inherit;
+    }
+
+    .diagram {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      font-family: Consolas, monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      white-space: pre;
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+
+    /* Steps */
+    ol.steps { padding-left: 1.25rem; }
+    ol.steps li { margin: 0.5rem 0; }
+
+    ul.notes { padding-left: 1.25rem; }
+    ul.notes li { margin: 0.4rem 0; }
+
+    /* Checklist */
+    .checklist {
+      list-style: none;
+      padding: 0;
+      margin: 1rem 0;
+    }
+
+    .checklist li {
+      padding: 0.5rem 0 0.5rem 1.75rem;
+      position: relative;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .checklist li::before {
+      content: "☐";
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-size: 1.1rem;
+    }
+
+    /* Callouts */
+    .callout {
+      background: var(--accent-light);
+      border-left: 4px solid var(--accent);
+      padding: 0.85rem 1rem;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      margin: 1rem 0;
+      font-size: 0.95rem;
+    }
+
+    .callout.warn {
+      background: #fef3c7;
+      border-left-color: #d97706;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+
+    .related {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .related a {
+      display: inline-block;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 0.4rem 0.85rem;
+      border-radius: 999px;
+      text-decoration: none;
+      font-size: 0.88rem;
+    }
+
+    .related a:hover { background: var(--accent-light); }
+
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    @media (max-width: 900px) {
+      .layout { flex-direction: column; }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+      .main { padding: 1.5rem 1.25rem 3rem; }
+    }
+
+    @media print {
+      .sidebar { display: none; }
+      .main { max-width: 100%; }
+      pre { white-space: pre-wrap; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <nav class="sidebar" aria-label="Table of contents">
+      <div class="brand">
+        Thai Invoice Extractor
+        <span>Deployment Guide</span>
+      </div>
+
+      <h2>Overview</h2>
+      <a href="#paths">Choose a path</a>
+      <a href="#before">Before you deploy</a>
+
+      <h2>Guides</h2>
+      <a href="#path-a">A — Railway + GitHub</a>
+      <a href="#path-b">B — Local Docker (LAN)</a>
+      <a href="#path-c">C — VPS + Docker</a>
+
+      <h2>Reference</h2>
+      <a href="#env-vars">Environment variables</a>
+      <a href="#checklist">Post-deploy checklist</a>
+      <a href="#choosing">Choosing a path</a>
+      <a href="#related">Related docs</a>
+    </nav>
+
+    <main class="main">
+      <h1>Deployment Guide</h1>
+      <p class="subtitle">Step-by-step instructions for deploying Thai Invoice Extractor. Pick the path that matches your environment.</p>
+
+      <section id="paths">
+        <h2>Choose a path</h2>
+        <div class="paths">
+          <div class="path-card">
+            <span class="badge">A</span>
+            <h4><a href="#path-a">Railway + GitHub</a></h4>
+            <p>Cloud hosting · Public internet · <code>git push</code> auto-deploys</p>
+          </div>
+          <div class="path-card">
+            <span class="badge">B</span>
+            <h4><a href="#path-b">Local server + Docker</a></h4>
+            <p>Office/home LAN · No public IP · <code>git pull</code> + deploy script</p>
+          </div>
+          <div class="path-card">
+            <span class="badge">C</span>
+            <h4><a href="#path-c">VPS + Docker</a></h4>
+            <p>Your Ubuntu server + domain · Nginx + TLS · <code>git pull</code> + script</p>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Path</th>
+              <th>Best for</th>
+              <th>Public internet</th>
+              <th>Auto-update from GitHub</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>A — Railway + GitHub</strong></td>
+              <td>Cloud hosting, no server admin</td>
+              <td>Yes (Railway URLs)</td>
+              <td>Yes — <code>git push</code></td>
+            </tr>
+            <tr>
+              <td><strong>B — Local Docker</strong></td>
+              <td>Office/home LAN, no public IP</td>
+              <td>No (LAN only)</td>
+              <td>Yes — <code>git pull</code> + script</td>
+            </tr>
+            <tr>
+              <td><strong>C — VPS + Docker</strong></td>
+              <td>Own Ubuntu server with domain</td>
+              <td>Yes (Nginx + TLS)</td>
+              <td>Yes — <code>git pull</code> + script</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="before">
+        <h2>Before you deploy</h2>
+
+        <h3>What to put on the server</h3>
+        <div class="callout warn">
+          <strong>Do not copy only <code>backend/</code> and <code>frontend/</code>.</strong> Docker also needs the <code>docker/</code> folder at the repo root.
+        </div>
+
+        <table>
+          <thead>
+            <tr><th>Path</th><th>Required folders</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Railway + GitHub</td>
+              <td>Full repo on GitHub (Railway clones it)</td>
+            </tr>
+            <tr>
+              <td>Docker (local or VPS)</td>
+              <td>Repo root: <code>backend/</code>, <code>frontend/</code>, <code>docker/</code> + <code>backend/.env</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p><strong>Never commit</strong> <code>backend/.env</code> with real secrets. Create it on the server or in Railway Variables.</p>
+
+        <h3>Accounts and keys</h3>
+        <table>
+          <thead>
+            <tr><th>Item</th><th>Required</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><a href="https://console.anthropic.com" target="_blank" rel="noopener">Anthropic API key</a></td>
+              <td>Yes — Claude vision extraction</td>
+            </tr>
+            <tr><td>GitHub repository</td><td>Yes for Railway and <code>git pull</code> workflows</td></tr>
+            <tr><td>Railway account</td><td>Path A only</td></tr>
+            <tr><td>Domain name</td><td>Path C (optional for Path B)</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Architecture (all paths)</h3>
+        <div class="diagram">Browser
+   │
+   ├──► Frontend (React static, port 8080 or Railway)
+   │
+   └──► Backend API (Express, port 3000)
+            │
+            ├──► PostgreSQL 17
+            └──► Anthropic Claude API (outbound HTTPS)</div>
+      </section>
+
+      <hr />
+
+      <section id="path-a">
+        <h2>A — Railway + GitHub</h2>
+        <p><em>Recommended for cloud.</em> Railway builds from your GitHub repo. Each <code>git push</code> to the connected branch triggers a new deploy.</p>
+
+        <h3>A1. Push code to GitHub</h3>
+        <pre><code>git init
+git add .
+git commit -m "Initial commit"
+git remote add origin https://github.com/YOUR_USER/YOUR_REPO.git
+git push -u origin main</code></pre>
+        <p>Ensure <code>.gitignore</code> excludes <code>backend/.env</code>, <code>node_modules/</code>, and <code>backend/uploads/</code>.</p>
+
+        <h3>A2. Create Railway project</h3>
+        <ol class="steps">
+          <li>Sign in at <a href="https://railway.app" target="_blank" rel="noopener">railway.app</a> with <strong>GitHub</strong>.</li>
+          <li><strong>New Project</strong>.</li>
+          <li><strong>+ New</strong> → <strong>Database</strong> → <strong>PostgreSQL</strong>.</li>
+          <li>Note the Postgres service name (e.g. <code>Postgres</code>).</li>
+        </ol>
+
+        <h3>A3. Deploy backend (API)</h3>
+        <ol class="steps">
+          <li><strong>+ New</strong> → <strong>GitHub Repo</strong> → select your repository.</li>
+          <li>Rename the service to <code>invoice-api</code>.</li>
+          <li><strong>Settings</strong> → <strong>Root Directory</strong> → <code>backend</code> → Save.</li>
+        </ol>
+        <p>Railway reads <code>backend/railway.toml</code>:</p>
+        <ul class="notes">
+          <li>Build: <code>npm ci --include=dev &amp;&amp; npm run build</code></li>
+          <li>Start: <code>npm start</code> (<code>node dist/server.js</code>)</li>
+          <li>Health check: <code>/health</code></li>
+        </ul>
+
+        <p><strong>Variables</strong> — add:</p>
+        <table>
+          <thead><tr><th>Variable</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td><code>NODE_ENV</code></td><td><code>production</code></td></tr>
+            <tr><td><code>DATABASE_URL</code></td><td><code>${{Postgres.DATABASE_URL}}</code> or paste from Postgres</td></tr>
+            <tr><td><code>ANTHROPIC_API_KEY</code></td><td>Your Claude API key</td></tr>
+            <tr><td><code>JWT_SECRET</code></td><td>Random string, ≥ 32 characters</td></tr>
+            <tr><td><code>RUN_MIGRATIONS_ON_START</code></td><td><code>true</code></td></tr>
+            <tr><td><code>JWT_ISSUER</code></td><td><code>thai-invoice-extractor</code></td></tr>
+            <tr><td><code>JWT_AUDIENCE</code></td><td><code>thai-invoice-api</code></td></tr>
+          </tbody>
+        </table>
+
+        <ol class="steps" start="4">
+          <li><strong>Settings</strong> → <strong>Networking</strong> → <strong>Generate Domain</strong>.</li>
+          <li>Copy the backend URL, e.g. <code>https://invoice-api-production-xxxx.up.railway.app</code>.</li>
+          <li>Verify: open <code>https://YOUR-BACKEND-URL/health</code> — expect <code>{ "success": true, "status": "ok" }</code>.</li>
+        </ol>
+
+        <p>Set URL variables (update again after frontend domain exists):</p>
+        <table>
+          <thead><tr><th>Variable</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td><code>PUBLIC_API_BASE_URL</code></td><td><code>https://YOUR-BACKEND-URL</code></td></tr>
+            <tr><td><code>ALLOWED_ORIGIN</code></td><td><code>https://YOUR-FRONTEND-URL</code> (set in A4)</td></tr>
+            <tr><td><code>FRONTEND_AUTH_CALLBACK_URL</code></td><td><code>https://YOUR-FRONTEND-URL/auth/callback</code></td></tr>
+          </tbody>
+        </table>
+
+        <h3>A4. Deploy frontend (UI)</h3>
+        <ol class="steps">
+          <li>In the <strong>same project</strong>: <strong>+ New</strong> → <strong>GitHub Repo</strong> → same repository.</li>
+          <li>Rename to <code>invoice-ui</code>.</li>
+          <li><strong>Settings</strong> → <strong>Root Directory</strong> → <code>frontend</code> → Save.</li>
+        </ol>
+
+        <p><strong>Variables</strong> (required <strong>before</strong> build — Vite inlines at build time):</p>
+        <table>
+          <thead><tr><th>Variable</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td><code>VITE_API_URL</code></td><td><code>https://YOUR-BACKEND-URL</code> (no trailing slash)</td></tr>
+            <tr><td><code>VITE_APP_NAME</code></td><td>Thai Invoice Extractor</td></tr>
+          </tbody>
+        </table>
+
+        <ol class="steps" start="4">
+          <li><strong>Networking</strong> → <strong>Generate Domain</strong> → copy frontend URL.</li>
+          <li>Return to <code>invoice-api</code> → update and redeploy:</li>
+        </ol>
+        <pre><code>ALLOWED_ORIGIN=https://YOUR-FRONTEND-URL
+FRONTEND_AUTH_CALLBACK_URL=https://YOUR-FRONTEND-URL/auth/callback</code></pre>
+
+        <h3>A5. Create admin user</h3>
+        <p>Run from your PC against Railway Postgres <code>DATABASE_URL</code>:</p>
+        <pre><code>cd backend
+npm ci
+
+# Linux / macOS
+export DATABASE_URL="postgresql://..."
+npm run user:seed -- admin@yourcompany.com 'YourSecurePassword123!' admin
+
+# Windows PowerShell
+$env:DATABASE_URL="postgresql://..."
+npm run user:seed -- admin@yourcompany.com 'YourSecurePassword123!' admin</code></pre>
+        <p>Or with Railway CLI:</p>
+        <pre><code>npm install -g @railway/cli
+railway login
+cd backend
+railway link
+railway run npm run user:seed -- admin@yourcompany.com 'YourSecurePassword123!' admin</code></pre>
+
+        <h3>A6. Auto-update from GitHub</h3>
+        <pre><code>git add .
+git commit -m "feat: your change"
+git push origin main</code></pre>
+        <table>
+          <thead><tr><th>Changed folder</th><th>Redeploys</th></tr></thead>
+          <tbody>
+            <tr><td><code>backend/**</code></td><td><code>invoice-api</code></td></tr>
+            <tr><td><code>frontend/**</code></td><td><code>invoice-ui</code></td></tr>
+          </tbody>
+        </table>
+        <div class="callout">
+          If <code>VITE_API_URL</code> changes, redeploy <strong>frontend</strong>. Backend-only env changes need an <strong>API</strong> redeploy.
+        </div>
+
+        <h3>A7. Railway checklist</h3>
+        <ul class="checklist">
+          <li><code>GET /health</code> on backend URL returns OK</li>
+          <li>Frontend loads over HTTPS</li>
+          <li><code>ALLOWED_ORIGIN</code> matches frontend URL exactly</li>
+          <li><code>VITE_API_URL</code> points to backend URL</li>
+          <li>Admin user seeded</li>
+          <li>Test invoice upload works</li>
+          <li>Optional: Volume on API for persistent <code>UPLOAD_DIR</code></li>
+        </ul>
+
+        <h3>A8. Railway troubleshooting</h3>
+        <table>
+          <thead><tr><th>Symptom</th><th>Fix</th></tr></thead>
+          <tbody>
+            <tr><td><code>tsc: not found</code></td><td>Root Directory must be <code>backend</code> or <code>frontend</code>; never build in Start Command</td></tr>
+            <tr><td>Environment validation failed</td><td>Compare with <code>backend/.env.example</code></td></tr>
+            <tr><td>CORS errors</td><td><code>ALLOWED_ORIGIN</code> must equal frontend URL exactly</td></tr>
+            <tr><td>UI calls wrong API</td><td>Fix <code>VITE_API_URL</code>, redeploy frontend</td></tr>
+            <tr><td>Table "extractions" does not exist</td><td>Set <code>RUN_MIGRATIONS_ON_START=true</code></td></tr>
+            <tr><td>Uploads lost after redeploy</td><td>Add a Railway volume or object storage</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <hr />
+
+      <section id="path-b">
+        <h2>B — Local server + Docker (LAN)</h2>
+        <p>For an <strong>on-prem Ubuntu box</strong> without a public IP. Users on the same LAN open <code>http://192.168.1.50:8080</code> (replace with your IP). No domain, Nginx, or Certbot required.</p>
+
+        <h3>B1. Install Docker on Ubuntu</h3>
+        <pre><code>sudo apt update
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER</code></pre>
+        <p>Log out and back in, then:</p>
+        <pre><code>docker compose version
+sudo apt install -y git</code></pre>
+
+        <h3>B2. Clone from GitHub</h3>
+        <pre><code>sudo mkdir -p /opt/invoice-extractor
+sudo chown $USER:$USER /opt/invoice-extractor
+cd /opt/invoice-extractor
+git clone https://github.com/YOUR_USER/YOUR_REPO.git .</code></pre>
+
+        <h3>B3. Find LAN IP</h3>
+        <pre><code>hostname -I
+# Example: 192.168.1.50</code></pre>
+        <p>Use a <strong>fixed IP</strong> (DHCP reservation on your router) so URLs do not break.</p>
+
+        <h3>B4. Configure</h3>
+        <pre><code>cp backend/.env.example backend/.env
+nano backend/.env</code></pre>
+        <p>Example for LAN (<code>192.168.1.50</code> = your IP):</p>
+        <pre><code>NODE_ENV=production
+DATABASE_URL=postgresql://invoice:invoice@postgres:5432/invoice_extractor
+ANTHROPIC_API_KEY=sk-ant-your-key
+JWT_SECRET=your-random-secret-at-least-32-characters-long
+
+ALLOWED_ORIGIN=http://192.168.1.50:8080
+PUBLIC_API_BASE_URL=http://192.168.1.50:3000
+FRONTEND_AUTH_CALLBACK_URL=http://192.168.1.50:8080/auth/callback
+
+RUN_MIGRATIONS_ON_START=true
+UPLOAD_DIR=/app/uploads</code></pre>
+        <p>Edit <code>docker/docker-compose.yml</code> — frontend build args:</p>
+        <pre><code>frontend:
+  build:
+    args:
+      VITE_API_URL: http://192.168.1.50:3000
+      VITE_APP_NAME: Thai Invoice Extractor</code></pre>
+        <p>Optional — persist uploads:</p>
+        <pre><code>backend:
+  volumes:
+    - ../backend/uploads:/app/uploads</code></pre>
+        <pre><code>mkdir -p backend/uploads</code></pre>
+
+        <h3>B5. Start stack</h3>
+        <pre><code>cd /opt/invoice-extractor/docker
+docker compose up -d --build
+docker compose ps
+curl http://localhost:3000/health</code></pre>
+        <p>Open from any PC on the LAN: <code>http://192.168.1.50:8080</code></p>
+
+        <h3>B6. Create admin user (one time)</h3>
+        <pre><code>cd /opt/invoice-extractor/backend
+export DATABASE_URL="postgresql://invoice:invoice@localhost:5432/invoice_extractor"
+npm ci
+npm run user:seed -- admin@local 'YourPassword123!' admin</code></pre>
+
+        <h3>B7. Update from GitHub</h3>
+        <pre><code>/opt/invoice-extractor/scripts/deploy-docker.sh</code></pre>
+        <p>Or manually:</p>
+        <pre><code>cd /opt/invoice-extractor
+git pull origin main
+cd docker
+docker compose up -d --build</code></pre>
+
+        <h3>B8. LAN notes</h3>
+        <ul class="notes">
+          <li><strong>Email/password login</strong> works on LAN. OAuth needs a public callback URL unless you add VPN/tunnel.</li>
+          <li><strong>CORS:</strong> <code>ALLOWED_ORIGIN</code> must match the browser URL exactly.</li>
+          <li><strong>Firewall</strong> (LAN only):</li>
+        </ul>
+        <pre><code>sudo ufw allow from 192.168.0.0/16 to any port 3000
+sudo ufw allow from 192.168.0.0/16 to any port 8080</code></pre>
+        <p>Do <strong>not</strong> expose PostgreSQL (5432) to your router.</p>
+      </section>
+
+      <hr />
+
+      <section id="path-c">
+        <h2>C — VPS + Docker (public server)</h2>
+        <p>For a cloud VPS with a public IP and custom domain. Full Nginx + TLS steps are in <code>SELF-HOSTED.md</code>.</p>
+        <ol class="steps">
+          <li>Clone repo to <code>/opt/invoice-extractor</code> (same as B2).</li>
+          <li>Configure <code>backend/.env</code> with <strong>HTTPS</strong> URLs and your domain.</li>
+          <li>Set <code>VITE_API_URL</code> in <code>docker/docker-compose.yml</code> to your API domain.</li>
+          <li><code>cd docker &amp;&amp; docker compose up -d --build</code></li>
+          <li>Install Nginx + Certbot (see SELF-HOSTED.md).</li>
+          <li>Seed admin user (same as B6).</li>
+          <li>Update with <code>scripts/deploy-docker.sh</code>.</li>
+        </ol>
+      </section>
+
+      <hr />
+
+      <section id="env-vars">
+        <h2>Environment variables reference</h2>
+
+        <h3>Backend (runtime)</h3>
+        <table>
+          <thead><tr><th>Variable</th><th>Required</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td><code>NODE_ENV</code></td><td>Yes</td><td><code>production</code> in deploy</td></tr>
+            <tr><td><code>DATABASE_URL</code></td><td>Yes</td><td>PostgreSQL connection string</td></tr>
+            <tr><td><code>ANTHROPIC_API_KEY</code></td><td>Yes</td><td>Claude API key</td></tr>
+            <tr><td><code>JWT_SECRET</code></td><td>Yes</td><td>≥ 32 characters</td></tr>
+            <tr><td><code>ALLOWED_ORIGIN</code></td><td>Yes</td><td>Exact frontend URL in browser</td></tr>
+            <tr><td><code>PUBLIC_API_BASE_URL</code></td><td>Yes</td><td>Public API URL</td></tr>
+            <tr><td><code>FRONTEND_AUTH_CALLBACK_URL</code></td><td>Yes</td><td><code>{frontend}/auth/callback</code></td></tr>
+            <tr><td><code>RUN_MIGRATIONS_ON_START</code></td><td>Recommended</td><td><code>true</code> for Railway / Docker</td></tr>
+            <tr><td><code>UPLOAD_DIR</code></td><td>Optional</td><td>Use volume in production</td></tr>
+            <tr><td><code>CLAUDE_MODEL</code></td><td>Optional</td><td>Default <code>claude-sonnet-4-6</code></td></tr>
+          </tbody>
+        </table>
+
+        <h3>Frontend (build time only)</h3>
+        <table>
+          <thead><tr><th>Variable</th><th>Required</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td><code>VITE_API_URL</code></td><td>Yes</td><td>Backend URL; rebuild when changed</td></tr>
+            <tr><td><code>VITE_APP_NAME</code></td><td>Optional</td><td>Shown in UI</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="checklist">
+        <h2>Post-deploy checklist (all paths)</h2>
+        <ul class="checklist">
+          <li>Backend <code>/health</code> returns success</li>
+          <li>Frontend loads in browser</li>
+          <li>Admin user created (<code>npm run user:seed</code>)</li>
+          <li>Login works</li>
+          <li>Invoice upload and extraction work</li>
+          <li><code>ALLOWED_ORIGIN</code> matches frontend URL exactly</li>
+          <li>Secrets only in Railway Variables or server <code>backend/.env</code></li>
+          <li>Database backups configured</li>
+        </ul>
+      </section>
+
+      <section id="choosing">
+        <h2>Choosing a path</h2>
+        <table>
+          <thead><tr><th>Question</th><th>Recommendation</th></tr></thead>
+          <tbody>
+            <tr><td>No server to manage?</td><td><strong>Railway + GitHub</strong> (Path A)</td></tr>
+            <tr><td>Internal office tool, no public IP?</td><td><strong>Local Docker</strong> (Path B)</td></tr>
+            <tr><td>Own Ubuntu VPS + domain?</td><td><strong>VPS Docker</strong> (Path C)</td></tr>
+            <tr><td>Want <code>git push</code> → live site?</td><td><strong>Railway + GitHub</strong> (Path A)</td></tr>
+            <tr><td>Want full control on LAN?</td><td><strong>Local Docker</strong> (Path B)</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="related">
+        <h2>Related docs</h2>
+        <div class="related">
+          <a href="DEPLOY.md">DEPLOY.md</a>
+          <a href="DEPLOYMENT.md">DEPLOYMENT.md</a>
+          <a href="SELF-HOSTED.md">SELF-HOSTED.md</a>
+          <a href="TROUBLESHOOTING.md">TROUBLESHOOTING.md</a>
+          <a href="API.md">API.md</a>
+        </div>
+      </section>
+
+      <footer>
+        Thai Invoice Extractor — Deployment Guide · Also available as <a href="DEPLOY.md">DEPLOY.md</a>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

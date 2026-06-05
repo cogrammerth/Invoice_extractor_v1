@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { Toaster } from 'sonner';
 
 import { App } from './App';
+import { initApiBase } from './config/api-base';
 import { AuthProvider } from './hooks/use-auth';
 import './styles/globals.css';
 
@@ -11,11 +12,13 @@ if (rootEl === null) {
   throw new Error('Root element #root not found');
 }
 
-createRoot(rootEl).render(
-  <StrictMode>
-    <AuthProvider>
-      <App />
-      <Toaster position="top-right" richColors closeButton />
-    </AuthProvider>
-  </StrictMode>,
-);
+void initApiBase().then(() => {
+  createRoot(rootEl).render(
+    <StrictMode>
+      <AuthProvider>
+        <App />
+        <Toaster position="top-right" richColors closeButton />
+      </AuthProvider>
+    </StrictMode>,
+  );
+});

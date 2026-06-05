@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 
 import { useAuth } from '../hooks/use-auth';
 import { useApi } from '../hooks/use-api';
-import { API_BASE } from '../services/api';
+import { getApiBase } from '../services/api';
 import { ApiClientError } from '../types/api.types';
 import type { AuthProviders } from '../types/auth.types';
 
@@ -80,7 +80,7 @@ export function LoginPage(): ReactElement {
   };
 
   const startOAuth = (provider: 'microsoft' | 'google'): void => {
-    window.location.href = `${API_BASE}/api/auth/oauth/${provider}`;
+    window.location.href = `${getApiBase()}/api/auth/oauth/${provider}`;
   };
 
   const domainHint =

@@ -1,7 +1,10 @@
-# Deployment Guide
+# Deployment Reference
+
+> **Start here:** [DEPLOY.md](./DEPLOY.md) — step-by-step guides for Railway + GitHub, local Docker (LAN), and VPS.
 
 | Target | Guide |
 |--------|--------|
+| **Step-by-step (recommended)** | [DEPLOY.md](./DEPLOY.md) |
 | **Your own VPS / dedicated server** | [Self-hosted server guide](./SELF-HOSTED.md) |
 | **Railway (Nixpacks or Docker)** | [Railway](#railway) below |
 | **Local full stack** | [Docker Compose](#docker-compose-full-stack) below |

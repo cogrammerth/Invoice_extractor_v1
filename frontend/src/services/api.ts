@@ -12,13 +12,11 @@ import type {
 } from '../types/api.types';
 import { ApiClientError } from '../types/api.types';
 import type { AuthProviders, LoginResponse } from '../types/auth.types';
-
-const API_BASE =
-  import.meta.env.VITE_API_URL?.replace(/\/$/, '') ?? 'http://localhost:3000';
+import { getApiBase } from '../config/api-base.js';
 
 function createClient(getToken: () => string): AxiosInstance {
   const client = axios.create({
-    baseURL: API_BASE,
+    baseURL: getApiBase(),
     timeout: 120_000,
     headers: {
       Accept: 'application/json',
@@ -174,4 +172,4 @@ export function createApiService(getToken: () => string): ApiService {
   };
 }
 
-export { API_BASE };
+export { getApiBase };

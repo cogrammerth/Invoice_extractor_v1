@@ -1,10 +1,14 @@
 # Railway config for the SPA service.
 # In Railway: create a service with Root Directory = frontend (this folder).
-# Set build-time vars: VITE_API_URL, VITE_APP_NAME
+#
+# Required on invoice-ui (runtime — no rebuild to change):
+#   API_URL = https://YOUR-BACKEND.up.railway.app
+# Optional build-time:
+#   VITE_API_URL (same URL), VITE_APP_NAME
 
 [build]
 builder = "NIXPACKS"
-buildCommand = "npm run build"
+buildCommand = "npm ci && npm run build"
 
 [deploy]
 startCommand = "npm start"

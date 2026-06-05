@@ -36,6 +36,9 @@ Thumbs.db
 coverage/
 .nyc_output/
 
+# Nested duplicate folder (zip extract artifact)
+Invoice_extractor_v1-main/
+
 # Misc
 *.local
 tmp/

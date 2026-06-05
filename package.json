@@ -24,7 +24,10 @@
     "lint": "npm run lint --prefix backend && npm run lint --prefix frontend",
     "test:frontend": "npm test --prefix frontend",
     "test:e2e": "playwright test",
-    "test:all": "npm test --prefix backend && npm run test:frontend && npm run test:integration --prefix backend"
+    "test:all": "npm test --prefix backend && npm run test:frontend && npm run test:integration --prefix backend",
+    "build": "tsc", 
+    "dev": "nodemon src/index.ts",
+    "start": "node dist/index.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0"

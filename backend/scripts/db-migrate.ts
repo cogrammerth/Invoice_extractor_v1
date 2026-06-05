@@ -25,10 +25,15 @@ function listMigrationFiles(): string[] {
 }
 
 function loadEnv(): void {
+  if (process.env.DATABASE_URL) {
+    return;
+  }
   const envPath = path.join(backendRoot, '.env');
   const result = dotenv.config({ path: envPath, override: true });
   if (result.error) {
-    throw new Error(`Could not load ${envPath}: ${result.error.message}`);
+    throw new Error(
+      `DATABASE_URL is not set and could not load ${envPath}: ${result.error.message}`,
+    );
   }
 }
 

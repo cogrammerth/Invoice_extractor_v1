@@ -2,7 +2,10 @@
 
 Deploy **Thai Invoice Extractor** on your own VPS or dedicated server (DigitalOcean, AWS EC2, Azure VM, on-prem Linux, etc.).
 
-For cloud platforms, see [DEPLOYMENT.md](./DEPLOYMENT.md) (Railway, Docker Hub).
+**Quick picks:**
+
+- [DEPLOY.md](./DEPLOY.md) — local LAN Docker (no public IP) or VPS Docker summary
+- [DEPLOYMENT.md](./DEPLOYMENT.md) — Railway, build reference, Docker Hub
 
 ## Architecture
 
