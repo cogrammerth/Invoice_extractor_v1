@@ -3,6 +3,7 @@
 
 ## Deployment context
 
+- **GitHub repo:** https://github.com/cogrammerth/Invoice_extractor_v1 (`main`)
 - **Railway project:** `invoiceExtractor` (see `.cursor/railway.md`)
 - Do not use other Railway projects (`invoice_extractor`, etc.) unless the user says otherwise.
 

@@ -1,4 +1,12 @@
-# Railway project context
+# Railway + GitHub context
+
+**GitHub repository:** https://github.com/cogrammerth/Invoice_extractor_v1  
+**Default branch:** `main`
+
+```bash
+git remote add origin https://github.com/cogrammerth/Invoice_extractor_v1.git
+git push -u origin main
+```
 
 **Active Railway project for this repo:** `invoiceExtractor`
 
@@ -15,11 +23,11 @@
 |---------|----------------|------------|
 | `invoice-api` | `backend` | https://invoice-api-production-3d13.up.railway.app |
 | `invoice-ui` | `frontend` | https://invoice-ui-production-4c66.up.railway.app |
+| `Postgres` | Railway plugin | (internal) |
 
 **invoice-ui variable (required):** `API_URL` = `https://invoice-api-production-3d13.up.railway.app`
 
 **invoice-api variables:** `ALLOWED_ORIGIN` = `https://invoice-ui-production-4c66.up.railway.app`
-| `Postgres` | Railway plugin | (internal) |
 
 When deploying, debugging, or using Railway MCP/CLI for this app, use **invoiceExtractor** — not `invoice_extractor` or other projects.
 

@@ -2,6 +2,8 @@
 
 Production-oriented web app for extracting structured data from Thai invoice images using **Claude Vision**, with PostgreSQL persistence, JWT auth, and a React 19 UI.
 
+**Repository:** [github.com/cogrammerth/Invoice_extractor_v1](https://github.com/cogrammerth/Invoice_extractor_v1)
+
 ## Features
 
 - 14-field Thai invoice extraction (exact Thai text preservation)
